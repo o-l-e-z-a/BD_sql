@@ -1,0 +1,50 @@
+{% extends 'admin.html'%}
+{% block body %}
+<table class="table1">
+            <tbody>
+            <tr >
+                <td> id</td>
+               <td>Бренд</td>
+                <td>Катеогория продукта</td>
+                <td>Размер</td>
+                <td>Цвет</td>
+                <td>Количество</td>
+<!--                <td class="td-link">-->
+<!--                <a class="btn btn-warning fgdfg" href="/tables">таблица</a>-->
+<!--                </td>-->
+            </tr >
+            {% for row in query %}
+            <tr >
+                <td>
+                    {{row['id']}}
+                </td>
+                   <td>
+                    {{row['brand_name']}}
+                </td>
+                 <td>
+                    {{row['category_name']}}
+                </td>
+
+                 <td>
+                    {{row['size_name']}}
+                </td>
+                 <td>
+                    {{row['color_name']}}
+                </td>
+                 <td>
+                    {{row['count']}}
+                </td>
+                 <td class="td-link">
+                     <a class="btn btn-info" href="/admin/change_characteristic/{{ row['id'] }}">подробнее</a>
+                </td>
+
+<!--                <td class="td-link">-->
+<!--                </td>-->
+
+            </tr>
+                            {% endfor %}
+
+</tbody>
+        </table>
+
+{% endblock %}

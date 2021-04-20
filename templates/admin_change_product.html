@@ -1,0 +1,50 @@
+{% extends 'admin.html'%}
+{% block body %}
+<table class="table1">
+            <tbody>
+            <tr >
+                <td> id</td>
+                <td>Бренд</td>
+                <td>Категория</td>
+                <td>Описание</td>
+                <td>Цена</td>
+                <td>Вес</td>
+                <td>Количество покупок</td>
+            </tr >
+            {% for row in query %}
+            <tr >
+                <td>
+                    {{row['id']}}
+                </td>
+                 <td>
+                    {{row['brand_name']}}
+                </td>
+                 <td>
+                    {{row['category_name']}}
+                </td>
+                <td>
+                    {{row['description']}}
+                </td>
+                 <td>
+                    {{row['cost']}}
+                </td>
+                 <td>
+                    {{row['weight']}}
+                </td>
+                 <td>
+                    {{row['sum']}}
+                </td>
+                 <td class="td-link">
+                     <a class="btn btn-info" href="/admin/change_product/{{ row['id'] }}">подробнее</a>
+                </td>
+
+<!--                <td class="td-link">-->
+<!--                </td>-->
+
+            </tr>
+                            {% endfor %}
+
+</tbody>
+        </table>
+
+{% endblock %}

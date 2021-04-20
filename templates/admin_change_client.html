@@ -1,0 +1,51 @@
+{% extends 'admin.html'%}
+{% block body %}
+<table class="table1">
+            <tbody>
+            <tr >
+                <td> id</td>
+                <td>Фамилия</td>
+                <td>Имя</td>
+                <td>Отчество</td>
+                <td>Номер телефона</td>
+                <td>Логин</td>
+                <td>Пароль</td>
+                <td>Количество заказов</td>
+            </tr >
+            {% for row in query %}
+            <tr >
+                <td>
+                    {{row['id']}}
+                </td>
+                 <td>
+                    {{row['surname']}}
+                </td>
+
+                 <td>
+                    {{row['name']}}
+                </td>
+                 <td>
+                    {{row['patronymic']}}
+                </td>
+                 <td>
+                    {{row['number_phone']}}
+                </td>
+                 <td>
+                    {{row['login']}}
+                </td>
+                <td>
+                    {{row['password']}}
+                </td>
+                 <td>
+                    {{row['count']}}
+                </td>
+                 <td class="td-link">
+                     <a class="btn btn-info" href="/admin/change_client/{{row['id']}}">подробнее</a>
+                </td>
+            </tr>
+                            {% endfor %}
+
+</tbody>
+        </table>
+
+{% endblock %}

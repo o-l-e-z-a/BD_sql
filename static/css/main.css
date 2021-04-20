@@ -1,0 +1,224 @@
+/* open-sans-300 - latin_cyrillic */
+@font-face {
+    font-family: 'Open Sans';
+    font-style: normal;
+    font-weight: 300;
+    src: local(''),
+         url('../fonts/open-sans-v18-latin_cyrillic-300.woff2') format('woff2'), /* Super Modern Browsers */
+         url('../fonts/open-sans-v18-latin_cyrillic-300.woff') format('woff'); /* Modern Browsers */
+  }
+  /* open-sans-regular - latin_cyrillic */
+  @font-face {
+    font-family: 'Open Sans';
+    font-style: normal;
+    font-weight: 400;
+    src: local(''),
+
+         url('../fonts/open-sans-v18-latin_cyrillic-regular.woff2') format('woff2'), /* Super Modern Browsers */
+         url('../fonts/open-sans-v18-latin_cyrillic-regular.woff') format('woff'); /* Modern Browsers */
+  }
+  /* open-sans-600 - latin_cyrillic */
+  @font-face {
+    font-family: 'Open Sans';
+    font-style: normal;
+    font-weight: 600;
+    src: local(''),
+         url('../fonts/open-sans-v18-latin_cyrillic-600.woff2') format('woff2'), /* Super Modern Browsers */
+         url('../fonts/open-sans-v18-latin_cyrillic-600.woff') format('woff'); /* Modern Browsers */
+  }
+
+*{
+    box-sizing: border-box;
+}
+
+a{
+    text-decoration: none;
+}
+
+ul{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+img{
+    max-width: 100%;
+}
+
+html{
+    font-family: 'Open Sans', 'sans-serif'
+}
+
+body{
+    background-color: #f5f5dc ;
+}
+
+td{
+    border: 2px solid #666; 
+    min-width: 70px;
+    min-height: 60px;
+    padding: 10px;
+    color: brown;
+}
+
+tr{
+    border: none;
+}
+
+.table1{
+    /* margin-top: 20px; */
+    border: none;
+    border-top: 2px solid #666; 
+    border-collapse: collapse;
+    width: 90%;
+    margin-bottom: 100px;
+}
+
+.nav{
+    margin-top: 0px;
+    display: flex;
+    margin-left: 0px;
+    flex-direction: column;
+    align-items: left;
+    justify-content: center;
+    padding-bottom: 20px;
+    /* border-bottom: 2px solid grey; */
+    width: 25%;
+    position: relative;
+}
+
+.container{
+    max-width: 100%;
+    padding-right: 80px;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    /* justify-content: ; */
+}
+
+.navbar{
+    padding-right: 200px;
+}
+
+.login-nav{
+    display:block;
+    margin-top: 25px;
+    padding-bottom: 0px;
+}
+
+.nav-link{
+    font-size: 20px;
+    color: cadetblue;
+}
+
+.td-link{
+    display: inline-block;
+    border: 2px solid #f5f5dc;
+    margin-left: 10px;
+    /* height: 60px; */
+}
+
+.form-container{
+    width: 40%;
+    text-align: center;
+    margin: auto;
+    margin-top: 200px;
+    /* margin-left: 250px; */
+}
+
+.right{
+    text-align: right;
+}
+
+.admin-add-product{
+    /* margin-top: 10px; */
+    margin-bottom: 200px;
+}
+
+.description{
+    /* height: 50px; */
+}
+
+.login-form{
+    margin-left: 350px;
+    margin-top: 20px;
+}
+
+.flash-msg{
+    margin-top: 20px;
+}
+
+
+.order-fio-client{
+    width: 350px;
+}
+
+.add-delivery-btn{
+    width: 180px;
+}
+
+.alert-messages{
+    margin-top: 0px;
+}
+
+
+.card{
+    width: 350px;
+    margin-right: 50px;
+}
+
+.category-img{
+    height: 450px;
+}
+
+.category-row{
+    margin-bottom: 100px;
+    /* margin-top: 50px; */
+    margin-left: 50px;
+}
+
+.card:not(:last-child){
+    margin-right: 50px;
+}
+
+.section-do-list{
+    margin-top: 50px;
+    display: flex;
+    /* justify-content: row; */
+}
+
+.section-do-item{
+    padding: 60px 30px;
+    flex: 1 1 25%;
+    border: 1px solid gold;
+    background-color: cadetblue;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.section-do-item:not(:last-child){
+    margin-right: 30px;
+}
+
+.category-link{
+    text-decoration: none;
+    color: gold;
+}
+
+.content{
+    width: 75%;
+    margin-left: 50px;
+    margin-top: 30px;
+}
+
+.no-padding{
+    padding-left: 0px;
+}
+
+.client-nav{
+    width: 15%;
+}
+
+.client-div{
+    width: 85%;
+}

@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block body %}
+<!--<div class="form-container">-->
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+    <div class="alert alert-danger">
+        {{ messages[0] }}
+    </div>
+{% endif %}
+{% endwith %}
+
+
+<form action="" method="post" >
+        <div class="justify-content">
+  {{ form.hidden_tag() }}
+      <div class="mb-6">
+{{ form.product.label() }}
+          </div>
+  {% if form.product.errors %}
+            <div class="col-md-8">
+  {{ form.product(class_="form-control is-invalid")}}
+                          </div>
+    {% for e in form.product.errors %}
+<span class="">
+    {{ e }}
+</span>
+    {% endfor %}
+        <br>
+  {% else %}
+        <div class="col-md-8">
+<!--            value="{0}".format(brand_id)-->
+  {{form.product(class_="form-control")}}
+          </div>
+  {% endif %}
+
+  <div class="mb-6">
+    {{ form.size.label() }}
+      </div>
+  {% if form.size.errors %}
+            <div class="col-md-8">
+  {{ form.size(class_="form-control is-invalid")}}
+                          </div>
+    {% for e in form.size.errors %}
+<span class="">
+    {{ e }}
+</span>
+    {% endfor %}
+        <br>
+  {% else %}
+        <div class="col-md-8">
+  {{form.size(class_="form-control")}}
+          </div>
+  {% endif %}
+
+  <div class="mb-6">
+    {{ form.color.label() }}
+      </div>
+  {% if form.color.errors %}
+            <div class="col-md-8">
+  {{ form.color(class_="form-control is-invalid")}}
+                          </div>
+    {% for e in form.color.errors %}
+<span class="">
+    {{ e }}
+</span>
+    {% endfor %}
+        <br>
+  {% else %}
+        <div class="col-md-8">
+  {{form.color(class_="form-control")}}
+          </div>
+  {% endif %}
+
+
+   <div class="mb-6">
+   {{ form.count.label() }}
+       </div>
+  {% if form.count.errors %}
+            <div class="col-md-8">
+  {{ form.count(class_="form-control is-invalid")}}
+                          </div>
+    {% for e in form.cost.errors %}
+<span class="">
+    {{ e }}
+</span>
+    {% endfor %}
+        <br>
+  {% else %}
+        <div class="col-md-8">
+  {{form.count(class_="form-control", value="{0}".format(count) )}}
+          </div>
+  {% endif %}
+  <br>
+  <div class="col-md-8">
+      {{ form.submit(class_="btn btn-primary") }}
+</div>
+            </div>
+</form>
+{% endblock %}
+
+<!-- HTML FORM !!!!!!!!!!!!!-->
+
+<!--<form method="POST" class="">-->
+<!--  <div class="mb-3">-->
+<!--    <input type="text" class="form-control" id="brand"  name="brand" value="{{ brand_id }}"-->
+<!--    placeholder="Введите id бренда">-->
+<!--  </div >-->
+
+<!--  <div class="mb-3">-->
+<!--   <input type="text" class="form-control" id="category"  name="category" value="{{ category_id }}"-->
+<!--    placeholder="Введите id категории">-->
+<!--  </div>-->
+
+<!--    <div class="mb-3" class="form-control">-->
+<!--        <textarea name="description" class="" id="description" cols="150" rows="5" placeholder="Введите описание">-->
+<!--            {{ description }}</textarea>-->
+<!--  </div>-->
+
+<!--    <div class="mb-3">-->
+<!--    <input type="text" class="form-control" id="price"  name="price" value="{{ price }}"-->
+<!--    placeholder="Введите стоимость продукта">-->
+<!--  </div>-->
+
+
+<!--  <div class="mb-3">-->
+<!--    <input type="text" class="form-control" id="weight"  name="weight" value="{{ weight }}"-->
+<!--    placeholder="Введите вес продукта">-->
+<!--  </div>-->
+<!--    <br>-->
+<!--  <button type="submit" class="btn btn-primary">Submit</button>-->
+<!--</form>-->
+<!--</div>-->

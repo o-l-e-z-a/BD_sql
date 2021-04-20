@@ -1,0 +1,12 @@
+{% extends 'client.html' %}
+{% block body %}
+    {% if current_user.is_authenticated %}
+    <ul class="section-do-list">
+        {% for row in query %}
+          <li class="section-do-item">
+                      <a href="/client/catalog/{{row['parent_id']}}/category/{{ row['id'] }}" class="category-link">
+              <h2>{{ row['name'] }}</h2></a>
+          </li>
+        {% endfor %}
+{% endif %}
+{% endblock %}

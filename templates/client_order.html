@@ -1,0 +1,39 @@
+{% extends 'client.html'%}
+{% block body %}
+    {% if current_user.is_authenticated %}
+
+        <table class="table1">
+            <tbody>
+            <tr >
+                <td>id Заказа</td>
+                <td>Статус заказа</td>
+                <td>Сумма заказа</td>
+                <td>Дата регистрации заказа</td>
+                <td>Дата завершения заказа</td>
+            </tr >
+            {% for row in query %}
+            <tr >
+                <td>
+                    {{row['id']}}
+                </td>
+                 <td>
+                    {{row['order_status']}}
+                </td>
+                 <td>
+                    {{row['order_value']}}
+                </td>
+                  <td>
+                    {{row['date_of_registration']}}
+                </td>
+                <td>
+                    {% if row['completion_date']%}
+                    {{row.completion_date}}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+     {% endif %}
+
+</tbody>
+        </table>
+{% endblock %}

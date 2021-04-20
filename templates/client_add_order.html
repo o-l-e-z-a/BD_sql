@@ -1,0 +1,47 @@
+{% extends 'client.html'%}
+{% block body %}
+
+
+<form action="" method="post"  class="admin-add-product">
+    {% with messages = get_flashed_messages() %}
+{% if messages %}
+    <div class="alert-messages alert alert-danger">
+        {{ messages[0] }}
+    </div>
+{% endif %}
+{% endwith %}
+  {{ form.hidden_tag() }}
+  {% for field in form  if field.name not in ['csrf_token', 'submit'] %}
+<!--    <br>-->
+    <div class="col-md-6">
+{{ field.label() }}
+        </div>
+    <div class="justify-content">
+  {% if field.errors %}
+            <div class="col-md-6">
+
+  {{ field(class_="form-control is-invalid")}}
+                          </div>
+<!--  <span  class="invalid-feedback ">-->
+    {% for e in field.errors %}
+<!--                <div class="invalid-feedback">-->
+<span class="color-red">
+    {{ e }}
+</span>
+    {% endfor %}
+  {% else %}
+
+        <div class="col-md-8">
+  {{field(class_="form-control")}}
+          </div>
+
+  {% endif %}
+{% endfor %}
+  <br>
+  <div class="col-md-8">
+      {{ form.submit(class="btn btn-primary") }}
+</div>
+</div>
+</form>
+
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends 'manager.html'%}
+{% block body %}
+        <table class="table1">
+            <tbody>
+            <tr >
+                <td>id Заказа</td>
+                <td>ФИО клиента</td>
+                <td>Статус заказа</td>
+                <td>Сумма заказа</td>
+                <td>Дата совершения заказа</td>
+                <td>Дата завершнения заказа</td>
+            </tr >
+            {% for row in query %}
+            <tr>
+                <td>
+                    {{row['id']}}
+                </td>
+                <td class="order-fio-client">
+                    {{'{0} {1} {2}'.format(row['surname'], row['name'], row['patronymic'])}}
+                </td>
+                 <td>
+                    {{row['order_status']}}
+                </td>
+                 <td>
+                    {{row['order_value']}}
+                </td>
+                 <td>
+                    {{row['date_of_registration']}}
+                </td>
+                 <td>
+                    {% if row['completion_date']%}
+                    {{row['completion_date']}}
+                    {% endif %}
+                </td>
+                <td class="td-link">
+                    {% if row['order_status'] == 'В обработке' %}
+            <a class="btn btn-success" href="/manager/accept_order/{{ row['id'] }}">Принять</a>
+        {% elif row['order_status'] == 'Принят' %}
+            <a class="btn btn btn-primary add-delivery-btn" href="/manager/add_delivery/{{ row['id'] }}">Передать в  доставку</a>
+        {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+
+</tbody>
+        </table>
+        
+    
+{% endblock %}

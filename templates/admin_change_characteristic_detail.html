@@ -1,0 +1,39 @@
+{% extends 'admin.html'%}
+{% block body %}
+<table class="table1">
+            <tbody>
+            <tr >
+                <td> id</td>
+                 <td>Бренд</td>
+                <td>Катеогория продукта</td>
+                <td>Размер</td>
+                <td>Цвет</td>
+                <td>Количество</td>
+            </tr>
+            {% for row in query %}
+            <tr>
+                <td>
+                    {{row['id']}}
+                </td>
+                <td>
+                    {{row['brand_name']}}
+                </td>
+                 <td>
+                    {{row['category_name']}}
+                </td>
+                 <td>
+                    {{row['size_name']}}
+                </td>
+                 <td>
+                    {{row['color_name']}}
+                </td>
+                 <td>
+                    {{row['count']}}
+                </td>
+            </tr>
+</tbody>
+        </table>
+<a class="btn btn-success" href="/admin/change_characteristic/{{row['id']}}/update">Изменить</a>
+                     <a class="btn btn-danger" href="/admin/change_characteristic/  {{row['id']}}/del">удалить</a>
+        {% endfor %}
+{% endblock %}

@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block body %}
+<!--<div class="form-container">-->
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+    <div class="alert alert-danger">
+        {{ messages[0] }}
+    </div>
+{% endif %}
+{% endwith %}
+
+
+<form action="" method="post" >
+        <div class="justify-content">
+  {{ form.hidden_tag() }}
+      <div class="mb-6">
+{{ form.brand.label() }}
+          </div>
+  {% if form.brand.errors %}
+            <div class="col-md-8">
+  {{ form.brand(class_="form-control is-invalid")}}
+                          </div>
+    {% for e in form.brand.errors %}
+<span class="">
+    {{ e }}
+</span>
+    {% endfor %}
+        <br>
+  {% else %}
+        <div class="col-md-8">
+<!--            value="{0}".format(brand_id)-->
+  {{form.brand(class_="form-control")}}
+          </div>
+  {% endif %}
+
+  <div class="mb-6">
+    {{ form.category.label() }}
+      </div>
+  {% if form.category.errors %}
+            <div class="col-md-8">
+  {{ form.category(class_="form-control is-invalid")}}
+                          </div>
+    {% for e in form.category.errors %}
+<span class="">
+    {{ e }}
+</span>
+    {% endfor %}
+        <br>
+  {% else %}
+        <div class="col-md-8">
+  {{form.category(class_="form-control" )}}
+          </div>
+  {% endif %}
+
+  <div class="mb-6">
+    {{ form.description.label() }}
+      </div>
+  {% if form.description.errors %}
+            <div class="col-md-8">
+  {{ form.description(class_="form-control is-invalid")}}
+                          </div>
+    {% for e in form.description.errors %}
+<span class="">
+    {{ e }}
+</span>
+    {% endfor %}
+        <br>
+  {% else %}
+        <div class="col-md-8">
+  {{form.description(class_="form-control", value="{0}".format(description))}}
+          </div>
+  {% endif %}
+
+
+   <div class="mb-6">
+   {{ form.cost.label() }}
+       </div>
+  {% if form.cost.errors %}
+            <div class="col-md-8">
+  {{ form.cost(class_="form-control is-invalid")}}
+                          </div>
+    {% for e in form.cost.errors %}
+<span class="">
+    {{ e }}
+</span>
+    {% endfor %}
+        <br>
+  {% else %}
+        <div class="col-md-8">
+  {{form.cost(class_="form-control", value="{0}".format(price) )}}
+          </div>
+  {% endif %}
+
+
+     <div class="mb-6">
+ {{ form.weight.label() }}
+     </div>
+  {% if form.weight.errors %}
+            <div class="col-md-8">
+  {{ form.weight(class_="form-control is-invalid")}}
+                          </div>
+    {% for e in form.weight.errors %}
+<span class="">
+    {{ e }}
+</span>
+    {% endfor %}
+        <br>
+  {% else %}
+        <div class="col-md-8">
+  {{form.weight(class_="form-control", value="{0}".format(weight) )}}
+          </div>
+  {% endif %}
+
+  <br>
+  <div class="col-md-8">
+      {{ form.submit(class_="btn btn-primary") }}
+</div>
+            </div>
+</form>
+{% endblock %}
+
+<!-- HTML FORM !!!!!!!!!!!!!-->
+
+<!--<form method="POST" class="">-->
+<!--  <div class="mb-3">-->
+<!--    <input type="text" class="form-control" id="brand"  name="brand" value="{{ brand_id }}"-->
+<!--    placeholder="Введите id бренда">-->
+<!--  </div >-->
+
+<!--  <div class="mb-3">-->
+<!--   <input type="text" class="form-control" id="category"  name="category" value="{{ category_id }}"-->
+<!--    placeholder="Введите id категории">-->
+<!--  </div>-->
+
+<!--    <div class="mb-3" class="form-control">-->
+<!--        <textarea name="description" class="" id="description" cols="150" rows="5" placeholder="Введите описание">-->
+<!--            {{ description }}</textarea>-->
+<!--  </div>-->
+
+<!--    <div class="mb-3">-->
+<!--    <input type="text" class="form-control" id="price"  name="price" value="{{ price }}"-->
+<!--    placeholder="Введите стоимость продукта">-->
+<!--  </div>-->
+
+
+<!--  <div class="mb-3">-->
+<!--    <input type="text" class="form-control" id="weight"  name="weight" value="{{ weight }}"-->
+<!--    placeholder="Введите вес продукта">-->
+<!--  </div>-->
+<!--    <br>-->
+<!--  <button type="submit" class="btn btn-primary">Submit</button>-->
+<!--</form>-->
+<!--</div>-->
