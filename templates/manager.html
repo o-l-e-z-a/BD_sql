@@ -1,21 +1,17 @@
-{% extends 'base.html' %}
-{% block title %}
-Менеджер
-{% endblock %}
-{% block nav %}
+{% extends 'base.html' %} {% block title %} Менеджер {% endblock %} {% block nav
+%}
 <!--<div class=" flex-md-row align-items-center pb-3 mb-4 border-bottom">-->
-    <nav class="nav client-nav">
-      <a class="nav-link" href="/manager/orders">Просмот заказов</a>
-       <a class="nav-link" href="/manager/pp">Пункты выдачи</a>
-      <!-- <a class="nav-link" href="/manager/add_delivery">Размещение доставки</a> -->
-<!--        <a class="nav-link" href="/manager/add_orders">Размещение заказа</a>-->
+<nav class="nav client-nav">
+  <a class="nav-link" href="/manager/orders">Просмот заказов</a>
+  <a class="nav-link" href="/manager/pp">Пункты выдачи</a>
+  <a class="nav-link" href="/manager/change_client"
+    >Просмотр и изменение клиентов</a
+  >
+  <a class="nav-link" href="/manager/add_client">Добавление нового клиента</a>
+  <!-- <a class="nav-link" href="/manager/add_delivery">Размещение доставки</a> -->
+  <!--        <a class="nav-link" href="/manager/add_orders">Размещение заказа</a>-->
 
-<!--        <a class="btn btn-warning" href="/create-article">Пункт выдачи</a>-->
-    </nav>
-      {% endblock %}
-      <div class="client-div">
-        {% block body%}
-        {%endblock%}
-        </div>
-
-
+  <!--        <a class="btn btn-warning" href="/create-article">Пункт выдачи</a>-->
+</nav>
+{% endblock %}
+<div class="client-div">{% block body%} {%endblock%}</div>

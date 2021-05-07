@@ -1,6 +1,6 @@
-{% extends 'manager.html'%} {% block body %}
+{% extends 'commodity_research.html'%} {% block body %}
 
-<form action="" method="post" class="admin-add-product">
+<form action="" method="post" class="commodity_research-add-product">
   {{ form.hidden_tag() }} {% for field in form if field.name not in
   ['csrf_token', 'submit'] %}
   <div class="col-md-6">{{ field.label() }}</div>
@@ -9,13 +9,12 @@
     <div class="col-md-6">{{ field(class_="form-control is-invalid")}}</div>
     {% for e in field.errors %}
     <span class="color-red"> {{ e }} </span>
-    {% endfor %} {% else %} {% if field.name in ['description'] %}
-    <div class="col-md-8">{{field(class_="form-control description")}}</div>
-    {% else %}
-    <div class="col-md-8">{{field(class_="form-control")}}</div>
-    {%endif%} {% endif %} {% endfor %}
+    {% endfor %} {% else %}
+    <div class="col-md-6">{{field(class_="form-control")}}</div>
+    {% endif %} {% endfor %}
     <br />
     <div class="col-md-8">{{ form.submit(class="btn btn-primary") }}</div>
   </div>
 </form>
+
 {% endblock %}

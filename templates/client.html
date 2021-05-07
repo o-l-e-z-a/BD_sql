@@ -1,23 +1,13 @@
-{% extends 'base.html' %}
-{% block title %}
-Клиент
-{% endblock %}
-
-{% block nav %}
+{% extends 'base.html' %} {% block title %} Клиент {% endblock %} {% block nav%}
 <!--<div class=" flex-md-row align-items-center pb-3 mb-4 border-bottom">-->
-    {% if current_user.is_authenticated %}
+{% if current_user.is_authenticated %}
 
-    <div class="nav client-nav">
-      <!-- ul -->
-      <a class="nav-link" href="/client/catalog">Каталог товаров</a>
-      <a class="nav-link" href="/client/order_status">Статус заказа</a>
-      <a class="nav-link" href="/client/pp">Пункт выдачи</a>
-      <a class="nav-link" href="/client/product_cart">Корзина</a>
-    </div >
-{% endif %}
-{% endblock %}
-<div class="client-div">
-{% block body%}
-{%endblock%}
+<div class="nav client-nav">
+  <!-- ul -->
+  <a class="nav-link" href="/client/catalog">Каталог товаров</a>
+  <a class="nav-link" href="/client/order_status">Статус заказа</a>
+  <a class="nav-link" href="/client/pp">Пункт выдачи</a>
+  <a class="nav-link" href="/client/product_cart">Корзина</a>
 </div>
-
+{% endif %} {% endblock %}
+<div class="client-div">{% block body%} {%endblock%}</div>

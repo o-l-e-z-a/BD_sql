@@ -3,7 +3,7 @@ from flask_login import LoginManager, login_required, current_user, login_user, 
 from forms import *
 from login import UserLogin
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 app.config.debug = True
 app.config['SECRET_KEY'] = 'dfgd5t623@$%^&*9ghf78bjsedfi3534((%^$%#$65ndfob7687dfdfbfg'
 login_manager = LoginManager(app)
@@ -202,34 +202,20 @@ def manager_view_pp():
     return render_template('manager_pp.html', query=query)
 
 
-@app.route('/admin')
+@app.route('/manager/change_client/<int:id>')
 @login_required
-def admin():
-    return render_template('admin.html')
+def manager_view_client_more(id):
+    manager = Manager(employee_id=current_user.get_id(True))
+    with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
+        with conn.cursor(cursor_factory=DictCursor) as cursor:
+            query = manager.check_client_more(cursor, id)
+    return render_template('manager_change_client_detail.html', query=query)
 
 
-@app.route('/admin/add_characteristic', methods=['POST', 'GET'])
+@app.route('/manager/add_client', methods=['POST', 'GET'])
 @login_required
-def admin_add_characteristic():
-    admin = Admin(employee_id=current_user.get_id(True))
-    form = CharacteristicsAddForm()
-    if form.validate_on_submit():
-        product_id = form.product.data
-        size_id = form.size.data
-        color_id = form.color.data
-        count = form.count.data
-        with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
-            with conn.cursor(cursor_factory=DictCursor) as cursor:
-                admin.add_charasteristics(cursor, conn, product_id, size_id, color_id, count)
-        return redirect('/admin')
-    else:
-        return render_template('admin_add_characteristic.html', form=form)
-
-
-@app.route('/admin/add_client', methods=['POST', 'GET'])
-@login_required
-def admin_add_client():
-    admin = Admin(employee_id=current_user.get_id(True))
+def manager_add_client():
+    manager = Manager(employee_id=current_user.get_id(True))
     form = AddClient()
     if form.validate_on_submit():
         surname = form.surname.data
@@ -240,152 +226,30 @@ def admin_add_client():
         password = form.password.data
         with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
             with conn.cursor(cursor_factory=DictCursor) as cursor:
-                admin.add_client(cursor, conn, surname, name, patronymic, number_phone, login, password)
-        return redirect('/admin')
+                    manager.add_client(cursor, conn, surname, name, patronymic, number_phone, login, password)
+        return redirect('/manager')
     else:
-        return render_template('admin_add_client.html', form=form)
+        return render_template('manager_add_client.html', form=form)
 
 
-@app.route('/admin/add_product', methods=['POST', 'GET'])
+@app.route('/manager/change_client')
 @login_required
-def admin_add_product():
-    admin = Admin(employee_id=current_user.get_id(True))
-    form = ProductAddForm()
-    if form.validate_on_submit():
-        brand_id = form.brand.data
-        category_id = form.category.data
-        description = form.description.data
-        price = form.cost.data
-        weight = form.weight.data
-        with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
-            with conn.cursor(cursor_factory=DictCursor) as cursor:
-                admin.add_product(cursor, conn, brand_id, category_id, description, price, weight)
-        return redirect('/admin/change_product')
-    else:
-        return render_template('admin_add_product.html', form=form)
-
-
-@app.route('/admin/add_size', methods=['POST', 'GET'])
-@login_required
-def admin_add_size():
-    admin = Admin(employee_id=current_user.get_id(True))
-    form = AddSize()
-    if form.validate_on_submit():
-        name = form.name.data
-        standart = form.standart.data
-        with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
-            with conn.cursor(cursor_factory=DictCursor) as cursor:
-                admin.add_size(cursor, conn, name, standart)
-        return redirect('/admin')
-    else:
-        return render_template('admin_add_size.html', form=form)
-
-
-@app.route('/admin/add_color', methods=['POST', 'GET'])
-@login_required
-def admin_add_color():
-    admin = Admin(employee_id=current_user.get_id(True))
-    form = AddColor()
-    if form.validate_on_submit():
-        name = form.name.data
-        code = form.code.data
-        with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
-            with conn.cursor(cursor_factory=DictCursor) as cursor:
-                admin.add_color(cursor, conn, name, code)
-        return redirect('/admin')
-    else:
-        return render_template('admin_add_color.html', form=form)
-
-
-@app.route('/admin/change_client')
-@login_required
-def admin_change_client():
-    admin = Admin(employee_id=current_user.get_id(True))
+def manager_change_client():
+    manager = Manager(employee_id=current_user.get_id(True))
     with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
         with conn.cursor(cursor_factory=DictCursor) as cursor:
-            query = admin.get_all_client_with_statistic(cursor)
-    return render_template('admin_change_client.html', query=query)
+            query = manager.get_all_client_with_statistic(cursor)
+    return render_template('manager_change_client.html', query=query)
 
 
-@app.route('/admin/change_characteristic')
+@app.route('/manager/change_client/<int:id>/update', methods=['POST', 'GET'])
 @login_required
-def admin_change_characteristic():
-    admin = Admin(employee_id=current_user.get_id(True))
-    with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
-        with conn.cursor(cursor_factory=DictCursor) as cursor:
-            query = admin.get_characteristics(cursor)
-    return render_template('admin_change_characteristic.html', query=query)
-
-
-@app.route('/admin/change_product')
-@login_required
-def admin_change_product():
-    admin = Admin(employee_id=current_user.get_id(True))
-    with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
-        with conn.cursor(cursor_factory=DictCursor) as cursor:
-            query = admin.get_all_product_with_statistic(cursor)
-    return render_template('admin_change_product.html', query=query)
-
-
-@app.route('/admin/change_client/<int:id>')
-@login_required
-def admin_view_client_more(id):
-    admin = Admin(employee_id=current_user.get_id(True))
-    with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
-        with conn.cursor(cursor_factory=DictCursor) as cursor:
-            query = admin.check_client_more(cursor, id)
-    return render_template('admin_change_client_detail.html', query=query)
-
-
-@app.route('/admin/change_product/<int:id>')
-@login_required
-def admin_view_product_more(id):
-    admin = Admin(employee_id=current_user.get_id(True))
-    with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
-        with conn.cursor(cursor_factory=DictCursor) as cursor:
-            query = admin.check_product_more(cursor, id)
-    return render_template('admin_change_product_detail.html', query=query)
-
-
-@app.route('/admin/change_characteristic/<int:id>')
-@login_required
-def admin_view_characteristic_more(id):
-    admin = Admin(employee_id=current_user.get_id(True))
-    with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
-        with conn.cursor(cursor_factory=DictCursor) as cursor:
-            query = admin.check_characteristic_more(cursor, id)
-    return render_template('admin_change_characteristic_detail.html', query=query)
-
-
-@app.route('/admin/change_product/<int:id>/del')
-@login_required
-def admin_view_product_del(id):
-    admin = Admin(employee_id=current_user.get_id(True))
-    with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
-        with conn.cursor(cursor_factory=DictCursor) as cursor:
-            query = admin.delete_product(cursor, conn, id)
-    return redirect('/admin/change_product')
-
-
-@app.route('/admin/change_characteristic/<int:id>/del')
-@login_required
-def admin_view_characteristic_del(id):
-    admin = Admin(employee_id=current_user.get_id(True))
-    with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
-        with conn.cursor(cursor_factory=DictCursor) as cursor:
-            query = admin.delete_charasteristic(cursor, conn, id)
-
-    return redirect('/admin/change_characteristic')
-
-
-@app.route('/admin/change_client/<int:id>/update', methods=['POST', 'GET'])
-@login_required
-def admin_view_client_update(id):
-    admin = Admin(employee_id=current_user.get_id(True))
+def manager_view_client_update(id):
+    manager = Manager(employee_id=current_user.get_id(True))
     form = ChangeClient()
     with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
         with conn.cursor(cursor_factory=DictCursor) as cursor:
-            surname, name, patronymic, number_phone, login, password = admin.check_client_more_to_update(cursor, id)
+            surname, name, patronymic, number_phone, login, password = manager.check_client_more_to_update(cursor, id)
     if form.validate_on_submit():
         surname = form.surname.data
         name = form.name.data
@@ -395,20 +259,164 @@ def admin_view_client_update(id):
         password = form.password.data
         with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
             with conn.cursor(cursor_factory=DictCursor) as cursor:
-                admin.change_client(cursor, conn, id, surname, name, patronymic, number_phone, login, password)
-        return redirect('/admin')
+                manager.change_client(cursor, conn, id, surname, name, patronymic, number_phone, login, password)
+        return redirect('/manager')
     else:
-        return render_template('admin_change_client_update.html', surname=surname, name=name, patronymic=patronymic,
+        return render_template('manager_change_client_update.html', surname=surname, name=name, patronymic=patronymic,
                                number_phone=number_phone, login=login, password=password, form=form)
 
-
-@app.route('/admin/change_characteristic/<int:id>/update', methods=['POST', 'GET'])
+@app.route('/manager/change_client/<int:id>/del')
 @login_required
-def admin_view_characteristic_update(id):
-    admin = Admin(employee_id=current_user.get_id(True))
+def manager_view_client_del(id):
+    manager = Manager(employee_id=current_user.get_id(True))
     with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
         with conn.cursor(cursor_factory=DictCursor) as cursor:
-            product_id, size_name, color_name, count = admin.check_characteristics_more_to_update(cursor, id)
+            query = manager.delete_client(cursor, conn, id)
+    return redirect('/manager/change_client')
+
+
+@app.route('/commodity_research')
+@login_required
+def commodity_research():
+    return render_template('commodity_research.html')
+
+
+@app.route('/commodity_research/add_characteristic', methods=['POST', 'GET'])
+@login_required
+def commodity_research_add_characteristic():
+    commodity_research = CommodityResearch(employee_id=current_user.get_id(True))
+    form = CharacteristicsAddForm()
+    if form.validate_on_submit():
+        product_id = form.product.data
+        size_id = form.size.data
+        color_id = form.color.data
+        count = form.count.data
+        with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
+            with conn.cursor(cursor_factory=DictCursor) as cursor:
+                commodity_research.add_charasteristics(cursor, conn, product_id, size_id, color_id, count)
+        return redirect('/commodity_research')
+    else:
+        return render_template('commodity_research_add_characteristic.html', form=form)
+
+
+@app.route('/commodity_research/add_product', methods=['POST', 'GET'])
+@login_required
+def commodity_research_add_product():
+    commodity_research = CommodityResearch(employee_id=current_user.get_id(True))
+    form = ProductAddForm()
+    if form.validate_on_submit():
+        brand_id = form.brand.data
+        category_id = form.category.data
+        description = form.description.data
+        price = form.cost.data
+        weight = form.weight.data
+        with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
+            with conn.cursor(cursor_factory=DictCursor) as cursor:
+                commodity_research.add_product(cursor, conn, brand_id, category_id, description, price, weight)
+        return redirect('/commodity_research/change_product')
+    else:
+        return render_template('commodity_research_add_product.html', form=form)
+
+
+@app.route('/commodity_research/add_size', methods=['POST', 'GET'])
+@login_required
+def commodity_research_add_size():
+    commodity_research = CommodityResearch(employee_id=current_user.get_id(True))
+    form = AddSize()
+    if form.validate_on_submit():
+        name = form.name.data
+        standart = form.standart.data
+        with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
+            with conn.cursor(cursor_factory=DictCursor) as cursor:
+                commodity_research.add_size(cursor, conn, name, standart)
+        return redirect('/commodity_research')
+    else:
+        return render_template('commodity_research_add_size.html', form=form)
+
+
+@app.route('/commodity_research/add_color', methods=['POST', 'GET'])
+@login_required
+def commodity_research_add_color():
+    commodity_research = CommodityResearch(employee_id=current_user.get_id(True))
+    form = AddColor()
+    if form.validate_on_submit():
+        name = form.name.data
+        code = form.code.data
+        with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
+            with conn.cursor(cursor_factory=DictCursor) as cursor:
+                commodity_research.add_color(cursor, conn, name, code)
+        return redirect('/commodity_research')
+    else:
+        return render_template('commodity_research_add_color.html', form=form)
+
+
+@app.route('/commodity_research/change_characteristic')
+@login_required
+def commodity_research_change_characteristic():
+    commodity_research = CommodityResearch(employee_id=current_user.get_id(True))
+    with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
+        with conn.cursor(cursor_factory=DictCursor) as cursor:
+            query = commodity_research.get_characteristics(cursor)
+    return render_template('commodity_research_change_characteristic.html', query=query)
+
+
+@app.route('/commodity_research/change_product')
+@login_required
+def commodity_research_change_product():
+    commodity_research = CommodityResearch(employee_id=current_user.get_id(True))
+    with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
+        with conn.cursor(cursor_factory=DictCursor) as cursor:
+            query = commodity_research.get_all_product_with_statistic(cursor)
+    return render_template('commodity_research_change_product.html', query=query)
+
+
+@app.route('/commodity_research/change_product/<int:id>')
+@login_required
+def commodity_research_view_product_more(id):
+    commodity_research = CommodityResearch(employee_id=current_user.get_id(True))
+    with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
+        with conn.cursor(cursor_factory=DictCursor) as cursor:
+            query = commodity_research.check_product_more(cursor, id)
+    return render_template('commodity_research_change_product_detail.html', query=query)
+
+
+@app.route('/commodity_research/change_characteristic/<int:id>')
+@login_required
+def commodity_research_view_characteristic_more(id):
+    commodity_research = CommodityResearch(employee_id=current_user.get_id(True))
+    with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
+        with conn.cursor(cursor_factory=DictCursor) as cursor:
+            query = commodity_research.check_characteristic_more(cursor, id)
+    return render_template('commodity_research_change_characteristic_detail.html', query=query)
+
+
+@app.route('/commodity_research/change_product/<int:id>/del')
+@login_required
+def commodity_research_view_product_del(id):
+    commodity_research = CommodityResearch(employee_id=current_user.get_id(True))
+    with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
+        with conn.cursor(cursor_factory=DictCursor) as cursor:
+            query = commodity_research.delete_product(cursor, conn, id)
+    return redirect('/commodity_research/change_product')
+
+
+@app.route('/commodity_research/change_characteristic/<int:id>/del')
+@login_required
+def commodity_research_view_characteristic_del(id):
+    commodity_research = CommodityResearch(employee_id=current_user.get_id(True))
+    with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
+        with conn.cursor(cursor_factory=DictCursor) as cursor:
+            query = commodity_research.delete_charasteristic(cursor, conn, id)
+    return redirect('/commodity_research/change_characteristic')
+
+
+@app.route('/commodity_research/change_characteristic/<int:id>/update', methods=['POST', 'GET'])
+@login_required
+def commodity_research_view_characteristic_update(id):
+    commodity_research = CommodityResearch(employee_id=current_user.get_id(True))
+    with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
+        with conn.cursor(cursor_factory=DictCursor) as cursor:
+            product_id, size_name, color_name, count = commodity_research.check_characteristics_more_to_update(cursor, id)
     form = CharacteristicsChangeForm(product=product_id, size=size_name, color=color_name)
     if form.validate_on_submit():
         product_id = form.product.data
@@ -417,19 +425,19 @@ def admin_view_characteristic_update(id):
         count = form.count.data
         with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
             with conn.cursor(cursor_factory=DictCursor) as cursor:
-                admin.change_characteristic(cursor, conn, id, product_id, size_name, color_name, count)
-        return redirect('/admin')
+                commodity_research.change_characteristic(cursor, conn, id, product_id, size_name, color_name, count)
+        return redirect('/commodity_research')
     else:
-        return render_template('admin_change_characteristic_update.html', count=count, form=form)
+        return render_template('commodity_research_change_characteristic_update.html', count=count, form=form)
 
 
-@app.route('/admin/change_product/<int:id>/update', methods=['POST', 'GET'])
+@app.route('/commodity_research/change_product/<int:id>/update', methods=['POST', 'GET'])
 @login_required
-def admin_view_product_update(id):
-    admin = Admin(employee_id=current_user.get_id(True))
+def commodity_research_view_product_update(id):
+    commodity_research = CommodityResearch(employee_id=current_user.get_id(True))
     with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
         with conn.cursor(cursor_factory=DictCursor) as cursor:
-            brand_id, category_id, description, price, weight = admin.check_product_more_to_update(cursor, id)
+            brand_id, category_id, description, price, weight = commodity_research.check_product_more_to_update(cursor, id)
     form = ProductChangeForm(brand=brand_id, category=category_id)
     if form.validate_on_submit():
         brand_id = form.brand.data
@@ -439,10 +447,10 @@ def admin_view_product_update(id):
         weight = form.weight.data
         with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
             with conn.cursor(cursor_factory=DictCursor) as cursor:
-                admin.change_product(cursor, conn, id, brand_id, category_id, description, price, weight)
-        return redirect('/admin/change_product')
+                commodity_research.change_product(cursor, conn, id, brand_id, category_id, description, price, weight)
+        return redirect('/commodity_research/change_product')
     else:
-        return render_template('admin_change_product_update.html', description=description, price=price, weight=weight,
+        return render_template('commodity_research_change_product_update.html', description=description, price=price, weight=weight,
                                form=form)
 
 
@@ -486,7 +494,7 @@ def login_stuff():
         if current_user.position == 'Менеджер':
             return redirect('/manager')
         elif current_user.position == 'Администратор':
-            return redirect('/admin')
+            return redirect('/commodity_research')
     if form.validate_on_submit():
         login = form.login.data
         password = form.password.data
@@ -505,7 +513,7 @@ def login_stuff():
             if employee['position'] == 'Менеджер':
                 return redirect('/manager')
             elif employee['position'] == 'Администратор':
-                return redirect('/admin')
+                return redirect('/commodity_research')
         else:
             flash('Вы ввели не правильные данные')
             return redirect('/login-stuff')

@@ -196,13 +196,13 @@ class BaseUser:
             pps.append((pp['id'], pp['address']))
         return pps
 
-    #
+
     def check_characteristic_more(self, cursor, characteristic_id):
         """
         Метод для получении информации об отдельной характеристике товара
         """
         cursor.execute(
-            """SELECT product.id, category.parent_id, category.id as category_id, brand.name as brand_name,
+            """SELECT characteristics.id, category.parent_id, category.id as category_id, brand.name as brand_name,
              category.name as category_name, size.name as size_name,color.name as color_name, 
              characteristics.count FROM characteristics
                INNER JOIN color on characteristics.color_id = color.id
@@ -210,7 +210,7 @@ class BaseUser:
                INNER JOIN size on characteristics.size_id = size.id
                INNER JOIN brand on product.brand_id = brand.id
                INNER JOIN category on product.category_id = category.id
-               WHERE characteristics.product_id = %s""", (characteristic_id,))
+               WHERE characteristics.id = %s""", (characteristic_id,))
         query = cursor.fetchall()
         return query
 
@@ -442,8 +442,89 @@ class Manager(BaseUser):
         query = cursor.fetchall()
         return query
 
+    def get_all_client_with_statistic(self, cursor):
+        try:
+            cursor.execute(
+                """with sum_client_order as (select client_id, count(client_id) from "order"
+                    group by client_id)
+                    select client.id, client.surname, client.name, client.patronymic,  client.number_phone,
+                    client.login, client.password, coalesce("count", 0) as "count" from client
+                    left join sum_client_order on client.id = sum_client_order.client_id
+                    order by "count"
+                    desc;""")
+            query = cursor.fetchall()
+            return query
+        except:
+            print('ошибка')
 
-class Admin(BaseUser):
+    def delete_client(self, cursor, conn, id):
+        """
+        Метод для удаления клиента
+        """
+        try:
+            cursor.execute(
+                """delete from  client where client.id = %s """, (id,))
+            conn.commit()
+        except:
+            print('такого пользователя не существует')
+
+    def add_client(self, cursor, conn, surname, name, patronymic, number_phone, login, password):
+        """
+        Метод для добавления клиента
+        """
+        try:
+            cursor.execute(
+                """INSERT INTO client(surname, name, patronymic, number_phone, login, password)
+                  values(%s,%s,%s,%s,%s,%s)""", (surname, name, patronymic, number_phone, login, password))
+            conn.commit()
+        except:
+            print('ввели не правильные данные')
+
+    def change_client(self, cursor, conn, id, surname, name, patronymic, phone, log, psw):
+        """
+        Метод для изменения клиента
+        """
+        try:
+            cursor.execute(
+                """update client set surname = %s, name = %s, patronymic = %s,  number_phone = %s, login = %s, password = %s
+                  where client.id = %s """, (surname, name, patronymic, phone, log, psw, id))
+            conn.commit()
+        except:
+            print('ввели не правильные данные')
+
+    def get_all_clients(self, cursor):
+        """
+        Метод для получения ирформации о всех характеристик
+        """
+        cursor.execute(
+            """SELECT client.id, client.surname, client.name, client.patronymic,  client.number_phone, client.login,
+              client.password FROM client order by client.id""")
+        query = cursor.fetchall()
+        return query
+
+    def check_client_more_to_update(self, cursor, client_id):
+        """
+        Метод для получения ирформации об отдельном клиенте
+        """
+        cursor.execute(
+            """SELECT client.surname, client.name, client.patronymic,  client.number_phone, client.login,  client.password FROM client
+               WHERE client.id = %s """, (client_id,))
+        query = cursor.fetchone()
+        return query['surname'], query['name'], query['patronymic'], query['number_phone'], query['login'], query[
+            'password']
+
+    def check_client_more(self, cursor, client_id):
+        """
+        Метод для получения ирформации об отдельном клиенте для его изменения
+        """
+        cursor.execute(
+            """SELECT client.id, client.surname, client.name, client.patronymic,  client.number_phone, client.login,  client.password FROM client
+               WHERE client.id = %s """, (client_id,))
+        query = cursor.fetchall()
+        return query
+
+
+class CommodityResearch(BaseUser):
     """
                Класс для представления Администратора
     """
@@ -470,31 +551,7 @@ class Admin(BaseUser):
         except:
             print('ошибка')
 
-    def get_all_client_with_statistic(self, cursor):
-        try:
-            cursor.execute(
-                """with sum_client_order as (select client_id, count(client_id) from "order"
-                    group by client_id)
-                    select client.id, client.surname, client.name, client.patronymic,  client.number_phone,
-                    client.login, client.password, coalesce("count", 0) as "count" from client
-                    left join sum_client_order on client.id = sum_client_order.client_id
-                    order by "count"
-                    desc;""")
-            query = cursor.fetchall()
-            return query
-        except:
-            print('ошибка')
 
-    def delete_client(self, cursor, conn, id):
-        """
-        Метод для удаления клиента
-        """
-        try:
-            cursor.execute(
-                """delete from  client where client.id = %s """, (id,))
-            conn.commit()
-        except:
-            print('такого пользователя не существует')
 
     def delete_product(self, cursor, conn, id):
         """
@@ -564,18 +621,6 @@ class Admin(BaseUser):
         except:
             print('ввели не правильные данные')
 
-    def add_client(self, cursor, conn, surname, name, patronymic, number_phone, login, password):
-        """
-        Метод для добавления клиента
-        """
-        try:
-            cursor.execute(
-                """INSERT INTO client(surname, name, patronymic, number_phone, login, password)
-                  values(%s,%s,%s,%s,%s,%s)""", (surname, name, patronymic, number_phone, login, password))
-            conn.commit()
-        except:
-            print('ввели не правильные данные')
-
     def change_characteristic(self, cursor, conn, id, product_id, size_id, color_id, count):
         """
         Метод для изменения характеристики товара
@@ -584,18 +629,6 @@ class Admin(BaseUser):
             cursor.execute(
                 """update characteristics set product_id = %s, size_id = %s, color_id = %s,  count = %s
                   where characteristics.id = %s """, (product_id, size_id, color_id, count, id))
-            conn.commit()
-        except:
-            print('ввели не правильные данные')
-
-    def change_client(self, cursor, conn, id, surname, name, patronymic, phone, log, psw):
-        """
-        Метод для изменения клиента
-        """
-        try:
-            cursor.execute(
-                """update client set surname = %s, name = %s, patronymic = %s,  number_phone = %s, login = %s, password = %s
-                  where client.id = %s """, (surname, name, patronymic, phone, log, psw, id))
             conn.commit()
         except:
             print('ввели не правильные данные')
@@ -612,16 +645,6 @@ class Admin(BaseUser):
         except:
             print('ввели не правильные данные')
 
-    def get_all_clients(self, cursor):
-        """
-        Метод для получения ирформации о всех характеристик
-        """
-        cursor.execute(
-            """SELECT client.id, client.surname, client.name, client.patronymic,  client.number_phone, client.login,
-              client.password FROM client order by client.id""")
-        query = cursor.fetchall()
-        return query
-
     def check_product_more_to_update(self, cursor, product_id):
         """
         Метод для получения ирформации о  характеристики отдельного товара
@@ -633,17 +656,6 @@ class Admin(BaseUser):
                    WHERE product.id = %s""", (product_id,))
         query = cursor.fetchone()
         return query['brand_id'], query['category_id'], query['description'], query['cost'], query['weight']
-
-    def check_client_more_to_update(self, cursor, client_id):
-        """
-        Метод для получения ирформации об отдельном клиенте
-        """
-        cursor.execute(
-            """SELECT client.surname, client.name, client.patronymic,  client.number_phone, client.login,  client.password FROM client
-               WHERE client.id = %s """, (client_id,))
-        query = cursor.fetchone()
-        return query['surname'], query['name'], query['patronymic'], query['number_phone'], query['login'], query[
-            'password']
 
     def check_characteristics_more_to_update(self, cursor, characteristic_id):
         """
@@ -673,15 +685,6 @@ class Admin(BaseUser):
         query = cursor.fetchall()
         return query
 
-    def check_client_more(self, cursor, client_id):
-        """
-        Метод для получения ирформации об отдельном клиенте для его изменения
-        """
-        cursor.execute(
-            """SELECT client.id, client.surname, client.name, client.patronymic,  client.number_phone, client.login,  client.password FROM client
-               WHERE client.id = %s """, (client_id,))
-        query = cursor.fetchall()
-        return query
 
 
 @db_conn
