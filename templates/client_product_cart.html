@@ -1,32 +1,28 @@
-{% extends 'client.html'%}
-{% block body %}
+{% extends 'client.html'%} {% block body %} {% if query|length == 0 %}
+<p style="font-size: 22px; margin-bottom: 30px">
+  Вы ничего не добавили в корзину, перейдите в каталог, чтобы просмотреть товары
+</p>
+<div style="text-align: center; width: 800px">
+  <a class="btn btn-warning" href="/client/catalog">перейти в каталог</a>
+</div>
+{% else %}
 <table class="table1">
-            <tbody>
-            <tr >
-                <td> id</td>
-                <td>Бренд</td>
-                <td>Категория</td>
-                <td>Количество на складе</td>
-            </tr >
-            {% for row in query %}
-            <tr >
-                <td>
-                    {{row['op_id']}}
-                </td>
-                 <td>
-                    {{row['brand_name']}}
-                </td>
-                 <td>
-                    {{row['category_name']}}
-                </td>
-                 <td>
-                    {{row['quantity']}}
-                </td>
-            </tr>
-            {% endfor %}
-
-</tbody>
-        </table>
+  <tbody>
+    <tr>
+      <td class="td-header">id</td>
+      <td class="td-header">Бренд</td>
+      <td class="td-header">Категория</td>
+      <td class="td-header">Количество</td>
+    </tr>
+    {% for row in query %}
+    <tr>
+      <td>{{row['op_id']}}</td>
+      <td>{{row['brand_name']}}</td>
+      <td>{{row['category_name']}}</td>
+      <td>{{row['quantity']}}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 <a class="btn btn-success" href="/client/add_order">добавить заказ</a>
-
-{% endblock %}
+{% endif %} {% endblock %}

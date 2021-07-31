@@ -21,19 +21,6 @@
       <td>
         {% if row['completion_date']%} {{row['completion_date']}} {% endif %}
       </td>
-      <td class="td-link">
-        {% if row['order_status'] == 'В обработке' %}
-        <a class="btn btn-success" href="/manager/accept_order/{{ row['id'] }}"
-          >Принять</a
-        >
-        {% elif row['order_status'] == 'Принят' %}
-        <a
-          class="btn btn btn-primary add-delivery-btn"
-          href="/manager/add_delivery/{{ row['id'] }}"
-          >Передать в доставку</a
-        >
-        {% endif %}
-      </td>
     </tr>
     {% endfor %}
   </tbody>

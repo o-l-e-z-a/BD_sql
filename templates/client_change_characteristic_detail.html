@@ -1,81 +1,57 @@
-{% extends 'client.html'%}
-{% block body %}
+{% extends 'client.html'%} {% block body %} {% if query|length == 0 %} {% else
+%}
 <table class="table1">
-            <tbody>
-            <tr >
-                <td> id</td>
-                <td>Бренд</td>
-                <td>Катеогория продукта</td>
-                <td>Размер</td>
-                <td>Цвет</td>
-                <td>Количество на складе</td>
-            </tr >
-            {% for row in query %}
-            <tr >
-                <td>
-                    {{row['id']}}
-                </td>
-                 <td>
-                    {{row['brand_name']}}
-                </td>
-                 <td>
-                    {{row['category_name']}}
-                </td>
-                 <td>
-                    {{row['size_name']}}
-                </td>
-                 <td>
-                    {{row['color_name']}}
-                </td>
-                 <td>
-                    {{row['count']}}
-                </td>
-                <td class="td-link">
-                    <a class="btn btn-info" href="/client/catalog/{{row['parent_id']}}/category/{{row['category_id']}}">вернуться обратно</a>
-                </td>
-            </tr>
-</tbody>
-        </table>
-                            {% endfor %}
-                            <form action="" method="post"  class="admin-add-product">
-                                {% with messages = get_flashed_messages() %}
-                            {% if messages %}
-                                <div class="alert-messages alert alert-danger">
-                                    {{ messages[0] }}
-                                </div>
-                            {% endif %}
-                            {% endwith %}
-                              {{ form.hidden_tag() }}
-                              {% for field in form  if field.name not in ['csrf_token', 'submit'] %}
-                            <!--    <br>-->
-                                <div class="col-md-6">
-                            {{ field.label() }}
-                                    </div>
-                                <div class="justify-content">
-                              {% if field.errors %}
-                                        <div class="col-md-6">
-                            
-                              {{ field(class_="form-control is-invalid")}}
-                                                      </div>
-                            <!--  <span  class="invalid-feedback ">-->
-                                {% for e in field.errors %}
-                            <!--                <div class="invalid-feedback">-->
-                            <span class="color-red">
-                                {{ e }}
-                            </span>
-                                {% endfor %}
-                              {% else %}
-                            
-                                    <div class="col-md-3 no-padding">
-                              {{field(class_="form-control")}}
-                                      </div>
-                            
-                              {% endif %}
-                            {% endfor %}
-                              <br>
-                              <div class="col-md-3 no-padding">
-                                  {{ form.submit(class="btn btn-primary") }}
-                            </div>
-                            </div>
-                            </form>
-{% endblock %}
+  <tbody>
+    <tr>
+      <td class="td-header">id</td>
+      <td class="td-header">Бренд</td>
+      <td class="td-header">Катеогория продукта</td>
+      <td class="td-header">Размер</td>
+      <td class="td-header">Цвет</td>
+      <td class="td-header">Количество на складе</td>
+    </tr>
+    {% for row in query %}
+    <tr>
+      <td>{{row['id']}}</td>
+      <td>{{row['brand_name']}}</td>
+      <td>{{row['category_name']}}</td>
+      <td>{{row['size_name']}}</td>
+      <td>{{row['color_name']}}</td>
+      <td>{{row['count']}}</td>
+      <td class="td-link">
+        <a
+          class="btn btn-info"
+          href="/client/catalog/{{row['parent_id']}}/category/{{row['category_id']}}"
+          >вернуться обратно</a
+        >
+      </td>
+    </tr>
+  </tbody>
+</table>
+{% endfor %}
+<form action="" method="post" class="admin-add-product">
+  {% with messages = get_flashed_messages() %} {% if messages %}
+  <div class="alert-messages alert alert-danger">{{ messages[0] }}</div>
+  {% endif %} {% endwith %} {{ form.hidden_tag() }} {% for field in form if
+  field.name not in ['csrf_token', 'submit'] %}
+  <!--    <br>-->
+  <div class="col-md-6">{{ field.label() }}</div>
+  <div class="justify-content">
+    {% if field.errors %}
+    <div class="col-md-6">{{ field(class_="form-control is-invalid")}}</div>
+    <!--  <span  class="invalid-feedback ">-->
+    {% for e in field.errors %}
+    <!--                <div class="invalid-feedback">-->
+    <span class="color-red"> {{ e }} </span>
+    {% endfor %} {% else %}
+
+    <div class="col-md-3 no-padding">{{field(class_="form-control")}}</div>
+
+    {% endif %} {% endfor %}
+    <br />
+    <div class="col-md-3 no-padding">
+      {{ form.submit(class="btn btn-primary") }}
+    </div>
+  </div>
+</form>
+{% endif %} {% endblock %}

@@ -15,16 +15,27 @@
   <body>
     <!--<div class=" flex-md-row align-items-center pb-3 mb-4 border-bottom">-->
     <div class="navbar login-nav">
+      <!-- <div class="right"> -->
       {% if not current_user.is_authenticated %}
       <div class="right">
+        <a
+          href="{{ url_for('registration') }}"
+          class="navbar-item btn btn-secondary"
+        >
+          Регистрация
+        </a>
         <a href="{{ url_for('login') }}" class="navbar-item btn btn-light">
-          Login
+          Войти в аккаунт
         </a>
       </div>
 
       {% endif %} {% if current_user.is_authenticated %}
       <div class="right">
-        <a href="{{ url_for('logout') }}" class="btn btn-dark"> Logout </a>
+        <!-- <div class="client-block"> -->
+        <a href="{{ url_for('logout') }}" class="btn btn-dark">
+          Выйти из аккаунта
+        </a>
+        <!-- </div> -->
       </div>
       {% endif %}
     </div>

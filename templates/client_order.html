@@ -1,39 +1,32 @@
-{% extends 'client.html'%}
-{% block body %}
-    {% if current_user.is_authenticated %}
-
-        <table class="table1">
-            <tbody>
-            <tr >
-                <td>id Заказа</td>
-                <td>Статус заказа</td>
-                <td>Сумма заказа</td>
-                <td>Дата регистрации заказа</td>
-                <td>Дата завершения заказа</td>
-            </tr >
-            {% for row in query %}
-            <tr >
-                <td>
-                    {{row['id']}}
-                </td>
-                 <td>
-                    {{row['order_status']}}
-                </td>
-                 <td>
-                    {{row['order_value']}}
-                </td>
-                  <td>
-                    {{row['date_of_registration']}}
-                </td>
-                <td>
-                    {% if row['completion_date']%}
-                    {{row.completion_date}}
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-     {% endif %}
-
-</tbody>
-        </table>
-{% endblock %}
+{% extends 'client.html'%} {% block body %} {% if current_user.is_authenticated
+%} {% if query|length == 0 %}
+<p style="font-size: 22px; margin-bottom: 30px">
+  Вы еще не сделали заказ, перейдите в каталог, чтобы просмотреть товары
+</p>
+<div style="text-align: center; width: 800px">
+  <a class="btn btn-warning" href="/client/catalog">перейти в каталог</a>
+</div>
+{% else %}
+<table class="table1">
+  <tbody>
+    <tr>
+      <td class="td-header">id Заказа</td>
+      <td class="td-header">Статус заказа</td>
+      <td class="td-header">Сумма заказа</td>
+      <td class="td-header">Дата регистрации заказа</td>
+      <td class="td-header">Дата завершения заказа</td>
+    </tr>
+    {% for row in query %}
+    <tr>
+      <td>{{row['id']}}</td>
+      <td>{{row['order_status']}}</td>
+      <td>{{row['order_value']}}</td>
+      <td>{{row['date_of_registration']}}</td>
+      <td>
+        {% if row['completion_date']%} {{row.completion_date}} {% endif %}
+      </td>
+    </tr>
+    {% endfor %} {% endif %}
+  </tbody>
+</table>
+{% endif %} {% endblock %}

@@ -1,9 +1,10 @@
-from datetime import date
+from datetime import date, timedelta
 import psycopg2
 from settings import *
 from contextlib import closing
 from psycopg2.extras import DictCursor
 from decimal import Decimal
+
 
 def db_conn(foo):
     """
@@ -53,13 +54,17 @@ class Login:
             print("Ошибка получения данных из БД ")
         return False
 
-    def get_user_by_email(self, cursor, login):
+    def get_user_by_email(self, cursor, login, telephone_number=None):
         """
         Метод для получения информации о клиение по его логину
         """
         try:
-            cursor.execute(f"SELECT * FROM client WHERE login = %s LIMIT 1", (login,))
+            if telephone_number:
+                cursor.execute(f"SELECT * FROM client WHERE login like %s or number_phone like %s LIMIT 1", (login, telephone_number))
+            else:
+                cursor.execute(f"SELECT * FROM client WHERE login = %s LIMIT 1", (login,))
             res = cursor.fetchone()
+
             if not res:
                 print("Пользователь не найден")
                 return False
@@ -161,15 +166,22 @@ class BaseUser:
             brands.append((b['id'], b['name']))
         return brands
 
-    def get_categories_list(self, cursor) -> list:
+    def get_categories_list(self, cursor, report=False) -> list:
         """
         Метод для получении списка категорий
         """
         categories = []
+        # category_index = []
         cursor.execute(""" SELECT cat_1.id, cat_1.name as child_name, cat_2.name as parent_name FROM category as cat_1 
                             JOIN category as cat_2 on cat_1.parent_id = cat_2.id ORDER BY cat_1.id""")
         for category in cursor.fetchall():
+            # if report:
+            #     categories.append(((category['id'], ), f'{category["child_name"]} : {category["parent_name"]}'))
             categories.append((category['id'], f'{category["child_name"]} : {category["parent_name"]}'))
+            # category_index.append(category['id'])
+        if report:
+            categories.append((0, 'Все категории'))
+            # print(tuple(category_index))
         return categories
 
     def get_products_list(self, cursor) -> list:
@@ -196,13 +208,62 @@ class BaseUser:
             pps.append((pp['id'], pp['address']))
         return pps
 
+    def get_years_list(self, cursor) -> list:
+        """
+        Метод для получение списка лет работы магазина
+        """
+        years = []
+        cursor.execute("""select distinct extract(YEAR from date_of_registration) as date_of_registration from "order" 
+        where order_status not like 'В корзине' """)
+        for year in cursor.fetchall():
+            # print(year['date_of_registration'], type(year['date_of_registration']) )
+            years.append((int(year['date_of_registration'])))
+        return years
 
-    def check_characteristic_more(self, cursor, characteristic_id):
+    def get_months_list(self, cursor) -> list:
+        """
+        Метод для получение списка месяцев работы магазина
+        """
+        months = []
+        cursor.execute("""select distinct extract(MONTH from date_of_registration) as date_of_registration from "order" 
+           where order_status not like 'В корзине' """)
+        for month in cursor.fetchall():
+            months.append(int(month['date_of_registration']))
+        current_month =int(date.today().strftime("%m"))
+        if current_month not in months:
+            months.append(current_month)
+        return months
+
+    def register(self, cursor, conn, surname, name, patronymic, number_phone, login, password):
+        """
+        Метод для добавления клиента
+        """
+        try:
+            cursor.execute(
+                """INSERT INTO client(surname, name, patronymic, number_phone, login, password)
+                  values(%s,%s,%s,%s,%s,%s)""", (surname, name, patronymic, number_phone, login, password))
+            conn.commit()
+        except:
+            print('ввели не правильные данные')
+
+    def check_characteristic_more(self, cursor, characteristic_id, client=False):
         """
         Метод для получении информации об отдельной характеристике товара
         """
-        cursor.execute(
-            """SELECT characteristics.id, category.parent_id, category.id as category_id, brand.name as brand_name,
+        if client:
+            cursor.execute(
+                """SELECT characteristics.id, category.parent_id, category.id as category_id, brand.name as brand_name,
+             category.name as category_name, size.name as size_name,color.name as color_name, 
+             characteristics.count FROM characteristics
+               INNER JOIN color on characteristics.color_id = color.id
+               INNER JOIN product on characteristics.product_id = product.id
+               INNER JOIN size on characteristics.size_id = size.id
+               INNER JOIN brand on product.brand_id = brand.id
+               INNER JOIN category on product.category_id = category.id
+               WHERE product.id = %s""", (characteristic_id,))
+        else:
+            cursor.execute(
+                """SELECT characteristics.id, category.parent_id, category.id as category_id, brand.name as brand_name,
              category.name as category_name, size.name as size_name,color.name as color_name, 
              characteristics.count FROM characteristics
                INNER JOIN color on characteristics.color_id = color.id
@@ -226,6 +287,13 @@ class Customer(BaseUser):
         self.name = name
         self.order_id = []
 
+    def get_information(self, cursor):
+        cursor.execute(
+            """SELECT login FROM client WHERE id = %s""", (self.id, ))
+        query = cursor.fetchone()
+        print(query, query['login'], 'sdfds')
+        return query
+
     def get_parent_category(self, cursor):
         cursor.execute(
             """SELECT id, name FROM category WHERE parent_id ISNULL""")
@@ -234,7 +302,9 @@ class Customer(BaseUser):
 
     def get_child_category(self, cursor, id):
         cursor.execute(
-            """SELECT id, name, parent_id FROM category WHERE parent_id = %s """, (id,))
+            """SELECT category.id, name, parent_id FROM category 
+              join product on product.category_id = category.id
+              WHERE parent_id = %s""", (id,))
         query = cursor.fetchall()
         return query
 
@@ -257,8 +327,8 @@ class Customer(BaseUser):
             """SELECT "order".id, "order".order_status, "order".order_value, "order".date_of_registration,
                "order".completion_date FROM "order"
                WHERE "order".client_id = %s AND "order".order_status not like 'В корзине'
-               ORDER BY "order".id
-               DESC""", (self.id,))
+               ORDER BY "order".order_status
+               """, (self.id,))
         query = cursor.fetchall()
         return query
 
@@ -295,10 +365,12 @@ class Customer(BaseUser):
 
     def check_blank_order(self, cursor):
         order_id = self.get_last_order_id(cursor)
-        cursor.execute(
-            """SELECT * from "order"
-              where id = %s and order_status like 'В корзине' """, (order_id,))
-        query = cursor.fetchall()
+        if order_id:
+            cursor.execute(
+                """SELECT * from "order"
+                where id = %s and order_status like 'В корзине' """, (order_id,))
+            query = cursor.fetchall()
+        query = None
         if query:
             return True
         else:
@@ -317,8 +389,11 @@ class Customer(BaseUser):
     def get_last_order_id(self, cursor):
         cursor.execute("""SELECT id from "order" where client_id = %s order by "order".id""", (self.id,))
         order_query = cursor.fetchall()
-        order_id = order_query[-1]['id']
-        return order_id
+        if order_query:
+            order_id = order_query[-1]['id']
+            return order_id
+        else:
+            return None
 
     def get_order_cart(self, cursor):
         order_id = self.get_last_order_id(cursor)
@@ -341,18 +416,42 @@ class Customer(BaseUser):
         order_value = Decimal('0')
         order_cart = self.get_order_cart(cursor)
         for row in order_cart:
-            print(row['cost'], row['quantity'], type(row['cost']))
+            # print(row['cost'], row['quantity'], type(row['cost']))
             order_value += row['cost'] * row['quantity']
-            print(order_value)
+            # print(order_value)
             cursor.execute(
-                    """UPDATE characteristics SET count = count - %s
+                """UPDATE characteristics SET count = count - %s
                     WHERE characteristics.product_id = %s""", (row['quantity'], row['p_id']))
             conn.commit()
+
+        cursor.execute("""SELECT amount_of_discount from client
+                JOIN discounts on client.discount_id = discounts.id
+                 where client.id = %s""", (self.id,))
+        query = cursor.fetchone()
+        if query:
+            discount = int(query['amount_of_discount'])
+            order_value *= Decimal((100-discount)/100)
+            order_value = order_value.quantize(Decimal("1.00"))
         date_of_registration = date.today().strftime("%Y.%m.%d")
         cursor.execute(
-                """Update "order" set employee_id = %s, order_value = %s, order_status = %s,  date_of_registration = %s
+            """Update "order" set employee_id = %s, order_value = %s, order_status = %s,  date_of_registration = %s
                   where "order".id = %s""", (employee_id, order_value, "В обработке", date_of_registration, order_id))
         conn.commit()
+
+        cursor.execute("""select  count(client_id), sum(order_value) as sum_value from "order"
+                where order_status not like('В корзине') and client_id = %s
+                group by client_id""", (self.id, ))
+        total_value = cursor.fetchone()['sum_value']
+        cursor.execute("""select * from discounts;""", (self.id,))
+        discounts_query = cursor.fetchall()
+        discount_id = None
+        for row in discounts_query:
+            if total_value > row['sum_orders']:
+                discount_id = row['id']
+        if discount_id:
+            cursor.execute(
+                """Update client set discount_id = %s where client.id = %s""", (discount_id, self.id))
+            conn.commit()
         # except:
         #     print('ввели не правильные данные')
 
@@ -392,8 +491,10 @@ class Manager(BaseUser):
               inner join ordering_product on ordering_product.order_id ="order".id  
                inner join product on ordering_product.product_id = product.id  
             WHERE "order".id = %s """, (order_id,))
-            weight_query = cursor.fetchone()
-            weight = weight_query['total_weight']
+            weight_query = cursor.fetchall()
+            weight = 0
+            for w in weight_query:
+                weight += w['total_weight']
             cursor.execute(
                 """INSERT INTO delivery(order_id, pickup_point_id, delivery_cost, sum_weight,  date_delivery)
                  values(%s,%s,%s,%s,%s)""", (order_id, pp_id, cost, weight, date_delivery))
@@ -427,8 +528,44 @@ class Manager(BaseUser):
             "order".order_value,  "order".date_of_registration, "order".completion_date FROM "order"
                inner join client on client.id ="order".client_id  
                WHERE "order".employee_id = %s
-               ORDER BY "order".id
-               DESC""", (self.id,))
+               ORDER BY "order".completion_date desc, "order".order_status 
+               """, (self.id,))
+        query = cursor.fetchall()
+        return query
+
+    def orders_report(self, cursor):
+        """
+        Метод для получении иноформации обо всех заказов для данного менежера
+        """
+        # d1 = date.today()
+        d1 = date(2021, 4, 15)
+        d3 = d1 - timedelta(days=3)
+        cursor.execute(
+            """SELECT "order".id, client.surname, client.name, client.patronymic,  "order".order_status, 
+            "order".order_value,  "order".date_of_registration, "order".completion_date FROM "order"
+               inner join client on client.id ="order".client_id  
+               WHERE "order".employee_id = %s  AND date_of_registration BETWEEN %s AND %s
+               ORDER BY "order".completion_date desc, "order".order_status
+               """, (self.id, d3, d1))
+        query = cursor.fetchall()
+        return query
+
+    def customers_report(self, cursor, year):
+        """
+        Метод для получении иноформации обо всех заказов для данного менежера
+        """
+        # d1 = date.today()
+        cursor.execute(
+            """with sum_client_order as (select client_id, count(client_id), sum(order_value) as sum_value from "order"
+                where order_status not like('В корзине') and  extract(year from date_of_registration) =  %s
+                group by client_id)
+                select client.id, client.surname, client.name, client.patronymic,
+                coalesce("count", 0) as "count", coalesce(sum_value, 0) as sum_value, coalesce(amount_of_discount, 0) as discount from client
+                left join sum_client_order on client.id = sum_client_order.client_id
+                left join discounts on client.discount_id = discounts.id
+                order by "count"
+                desc
+               """, (year,))
         query = cursor.fetchall()
         return query
 
@@ -441,21 +578,6 @@ class Manager(BaseUser):
             pickup_point.number_phone_pp  FROM pickup_point""")
         query = cursor.fetchall()
         return query
-
-    def get_all_client_with_statistic(self, cursor):
-        try:
-            cursor.execute(
-                """with sum_client_order as (select client_id, count(client_id) from "order"
-                    group by client_id)
-                    select client.id, client.surname, client.name, client.patronymic,  client.number_phone,
-                    client.login, client.password, coalesce("count", 0) as "count" from client
-                    left join sum_client_order on client.id = sum_client_order.client_id
-                    order by "count"
-                    desc;""")
-            query = cursor.fetchall()
-            return query
-        except:
-            print('ошибка')
 
     def delete_client(self, cursor, conn, id):
         """
@@ -534,24 +656,32 @@ class CommodityResearch(BaseUser):
         self.surname = surname
         self.name = name
 
-    def get_all_product_with_statistic(self, cursor):
+    def products_report(self, cursor, category_id, month):
         try:
+            # print(category_id)
+            if isinstance(category_id, int):
+                if category_id == 0:
+                    category_id = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+                else:
+                    category_id = (category_id, )
             cursor.execute(
                 """with sum_order_product as (select product_id, sum(quantity) from ordering_product
-                group by product_id)
-                select product.id, brand.name as brand_name, category.name as category_name, 
-                product.description, product.cost, product.weight, coalesce("sum", 0) as "sum" from product
+                join "order" on ordering_product.order_id = "order".id 
+                where extract(month from date_of_registration) = %s group by product_id) 
+                 select product.id, brand.name as brand_name, category.name as category_name, 
+                product.description, product.cost, product.weight, coalesce("sum", 0) as "sum",
+                 "characteristics".count from product 
                 left join sum_order_product on product.id = sum_order_product.product_id
                 join brand on product.brand_id = brand.id
                 join category on product.category_id = category.id
+                join "characteristics" on product.id = "characteristics".product_id
+                 where category.id in %s
                 order by "sum"
-                desc """)
+                desc  """, (month, category_id))
             query = cursor.fetchall()
             return query
         except:
             print('ошибка')
-
-
 
     def delete_product(self, cursor, conn, id):
         """
@@ -686,13 +816,17 @@ class CommodityResearch(BaseUser):
         return query
 
 
-
 @db_conn
 def print_product(cursor, conn):
-    base = Customer(12)
+    base = Customer(1)
+    query = base.get_order_cart(cursor)
+    print(len(query))
+    for row in query:
+        print(row)
+    # print()
     # query = base.get_product_count(cursor, 3)
     # print(type(query), query)
-    a = base.check_blank_order(cursor)
+    # a = base.check_blank_order(cursor)
     # print(a)
 # query = base.change_product(cursor, conn, 1, 1, 1, 'Платье женское Guess желтого цвета', 2300, 0.9)  88005553535
 # query = base.change_client(cursor, conn, 1, 'Иванов', 'Иван', 'Иванович', '88005553535', 'ivanov@mail.ru', 'ivanov')
@@ -703,8 +837,7 @@ def print_product(cursor, conn):
 #     query = base.check_characteristic_more(cursor, 1)
 # base.add_delivery(cursor, conn, 3, 3, 2700, '2022-01-10')
 # print(query)
-#     for row in query:
-#         print(row)
+
 # print(row['brand_name'])
 
 

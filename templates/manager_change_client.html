@@ -2,14 +2,13 @@
 <table class="table1">
   <tbody>
     <tr>
-      <td>id</td>
-      <td>Фамилия</td>
-      <td>Имя</td>
-      <td>Отчество</td>
-      <td>Номер телефона</td>
-      <td>Логин</td>
-      <td>Пароль</td>
-      <td>Количество заказов</td>
+      <td class="td-header">id</td>
+      <td class="td-header">Фамилия</td>
+      <td class="td-header">Имя</td>
+      <td class="td-header">Отчество</td>
+      <td class="td-header">Номер телефона</td>
+      <td class="td-header">Логин</td>
+      <td class="td-header">Пароль</td>
     </tr>
     {% for row in query %}
     <tr>
@@ -21,7 +20,6 @@
       <td>{{row['number_phone']}}</td>
       <td>{{row['login']}}</td>
       <td>{{row['password']}}</td>
-      <td>{{row['count']}}</td>
       <td class="td-link">
         <a class="btn btn-info" href="/manager/change_client/{{row['id']}}"
           >подробнее</a

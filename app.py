@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, flash
+from flask import Flask, render_template, redirect, flash, g
 from flask_login import LoginManager, login_required, current_user, login_user, logout_user
 from forms import *
 from login import UserLogin
@@ -29,6 +29,12 @@ def home():
 @app.route('/client')
 @login_required
 def client():
+    # client = Customer(current_user.get_id())
+    # with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
+    #     with conn.cursor(cursor_factory=DictCursor) as cursor:
+    #         query = client.get_information(cursor)
+            # print(query, query['login'])
+    # g.user_login = query['login']
     return render_template('client.html')
 
 
@@ -108,7 +114,7 @@ def view_product_more(id):
     customer = Customer(client_id=current_user.get_id())
     with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
         with conn.cursor(cursor_factory=DictCursor) as cursor:
-            query = customer.check_characteristic_more(cursor, id)
+            query = customer.check_characteristic_more(cursor, id, client=True)
     form = AddOrderForm()
     if form.validate_on_submit():
         count = form.count.data
@@ -163,6 +169,15 @@ def manager_view_orders():
         with conn.cursor(cursor_factory=DictCursor) as cursor:
             query = manager.check_orders(cursor)
     return render_template('manager_orders.html', query=query)
+
+
+@app.route('/manager/orders_report')
+def manager_orders_report():
+    manager = Manager(employee_id=current_user.get_id(True))
+    with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
+        with conn.cursor(cursor_factory=DictCursor) as cursor:
+            query = manager.orders_report(cursor)
+    return render_template('manager_orders_report.html', query=query)
 
 
 @app.route('/manager/add_delivery/<int:id>', methods=['POST', 'GET'])
@@ -238,8 +253,28 @@ def manager_change_client():
     manager = Manager(employee_id=current_user.get_id(True))
     with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
         with conn.cursor(cursor_factory=DictCursor) as cursor:
-            query = manager.get_all_client_with_statistic(cursor)
+            query = manager.get_all_clients(cursor)
     return render_template('manager_change_client.html', query=query)
+
+
+@app.route('/manager/customers_report', methods=['POST', 'GET'])
+@login_required
+def manager_customers_report():
+    manager = Manager(employee_id=current_user.get_id(True))
+    form = CustomersReport()
+    if form.validate_on_submit():
+        year = form.years.data
+        with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
+            with conn.cursor(cursor_factory=DictCursor) as cursor:
+                query = manager.customers_report(cursor, year)
+        return render_template('manager_customers_report.html', form=form, query=query)
+    else:
+        with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
+            with conn.cursor(cursor_factory=DictCursor) as cursor:
+                query = manager.customers_report(cursor, year=date.today().strftime("%Y"))
+        return render_template('manager_customers_report.html', form=form, query=query)
+
+    # return render_template('manager_change_client.html', query=query)
 
 
 @app.route('/manager/change_client/<int:id>/update', methods=['POST', 'GET'])
@@ -265,6 +300,7 @@ def manager_view_client_update(id):
         return render_template('manager_change_client_update.html', surname=surname, name=name, patronymic=patronymic,
                                number_phone=number_phone, login=login, password=password, form=form)
 
+
 @app.route('/manager/change_client/<int:id>/del')
 @login_required
 def manager_view_client_del(id):
@@ -279,6 +315,26 @@ def manager_view_client_del(id):
 @login_required
 def commodity_research():
     return render_template('commodity_research.html')
+
+
+@app.route('/commodity_research/product_report', methods=['POST', 'GET'])
+@login_required
+def commodity_research_product_report():
+    commodity_research = CommodityResearch(employee_id=current_user.get_id(True))
+    form = ProductsReport()
+    if form.validate_on_submit():
+        month = form.months.data
+        category_id = form.category.data
+        with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
+            with conn.cursor(cursor_factory=DictCursor) as cursor:
+                query = commodity_research.products_report(cursor, category_id=category_id, month=month)
+        return render_template('commodity_research_product_report.html', form=form, query=query)
+    else:
+        with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
+            with conn.cursor(cursor_factory=DictCursor) as cursor:
+                query = commodity_research.products_report(cursor, category_id=(1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
+                                                           month=date.today().strftime("%m"))
+        return render_template('commodity_research_product_report.html', form=form, query=query)
 
 
 @app.route('/commodity_research/add_characteristic', methods=['POST', 'GET'])
@@ -366,7 +422,7 @@ def commodity_research_change_product():
     commodity_research = CommodityResearch(employee_id=current_user.get_id(True))
     with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
         with conn.cursor(cursor_factory=DictCursor) as cursor:
-            query = commodity_research.get_all_product_with_statistic(cursor)
+            query = commodity_research.get_all_product(cursor)
     return render_template('commodity_research_change_product.html', query=query)
 
 
@@ -502,7 +558,7 @@ def login_stuff():
             with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
                 with conn.cursor(cursor_factory=DictCursor) as cursor:
                     employee = Login().get_employee_by_email(cursor, login)
-                    print(employee['password_employee'])
+                    # print(employee['password_employee'])
                     password_flag = True if employee['password_employee'] == password else False
         except:
             flash('Неправильный логин')
@@ -519,6 +575,36 @@ def login_stuff():
             return redirect('/login-stuff')
     else:
         return render_template('login-stuff.html', form=form)
+
+
+@app.route("/registration", methods=["POST", "GET"])
+def registration():
+    form = Registration()
+    if form.validate_on_submit():
+        log = Login()
+        surname = form.surname.data
+        name = form.name.data
+        patronymic = form.patronymic.data
+        number_phone = form.number_phone.data
+        login = form.login.data
+        password = form.password.data
+        password2 = form.password2.data
+        if password != password2:
+            flash('Пароли не совпадают')
+            return render_template('login.html', form=form)
+        else:
+            with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
+                with conn.cursor(cursor_factory=DictCursor) as cursor:
+                    if log.get_user_by_email(cursor, login, number_phone):
+                        flash('Пользователь с таким email/номером телефона уже существует')
+                        return render_template('login.html', form=form)
+                    else:
+                        base = BaseUser()
+                        base.register(cursor, conn, surname, name, patronymic, number_phone, login, password)
+                        return redirect('/login')
+    else:
+        return render_template('login.html', form=form)
+    # if request.method == "POST":
 
 
 @app.route("/logout")

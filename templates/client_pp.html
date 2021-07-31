@@ -1,37 +1,36 @@
-{% extends 'client.html'%}
-{% block body %}
-    {% if current_user.is_authenticated %}
-        <table class="table1">
-            <tbody>
-            <tr >
-                <td>id Заказа</td>
-                <td>Адрес</td>
-                <td>Время работы</td>
-                <td>Номер телефона</td>
-<!--                <td class="td-link">-->
-<!--                <a class="btn btn-warning fgdfg" href="/tables">таблица</a>-->
-<!--                </td>-->
-            </tr >
-            {% for row in query %}
-            <tr >
-                <td>
-                    {{row['id']}}
-                </td>
-                <td>
-                    {{row['address']}}
-                </td>
-                 <td>
-                    {{row['time_start'].strftime("%H:%M")}} - {{ row['time_end'].strftime("%H:%M")}}
-                </td>
-                 <td>
-                    {{row['number_phone_pp']}}
-                </td>
-            </tr>
-            {% endfor %}
-</tbody>
-        </table>
+{% extends 'client.html'%} {% block body %} {% if current_user.is_authenticated
+%} {% if query|length == 0 %}
+<p style="font-size: 22px; margin-bottom: 30px">
+  Вы еще не сделали заказ, перейдите в каталог, чтобы просмотреть товары
+</p>
+<div style="text-align: center; width: 800px">
+  <a class="btn btn-warning" href="/client/catalog">перейти в каталог</a>
+</div>
+{% else %}
+<table class="table1">
+  <tbody>
+    <tr>
+      <td class="td-header">id Заказа</td>
+      <td class="td-header">Адрес</td>
+      <td class="td-header">Время работы</td>
+      <td class="td-header">Номер телефона</td>
+      <!--                <td class="td-link">-->
+      <!--                <a class="btn btn-warning fgdfg" href="/tables">таблица</a>-->
+      <!--                </td>-->
+    </tr>
+    {% for row in query %}
+    <tr>
+      <td>{{row['id']}}</td>
+      <td>{{row['address']}}</td>
+      <td>
+        {{row['time_start'].strftime("%H:%M")}} - {{
+        row['time_end'].strftime("%H:%M")}}
+      </td>
+      <td>{{row['number_phone_pp']}}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 
 <!--    </div>-->
-    {% endif %}
-
-{% endblock %}
+{% endif %} {% endif %} {% endblock %}

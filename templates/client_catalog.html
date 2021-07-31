@@ -1,22 +1,26 @@
-{% extends 'client.html'%}
-{% block body %}
-    {% if current_user.is_authenticated %}
+{% extends 'client.html' %} {% block body %} {% if current_user.is_authenticated
+%}
 <!--  <img src="/img/women.jpeg" class="">-->
 <div class="row category-row">
-{% for row in query %}
-<a href="/client/catalog/{{ row['id'] }}">
-<div class="card text-center">
-    {% if row['name'] == "женское" %}
-  <img src="{{ url_for('static', filename='img/women.jpeg') }}" class="card-img-top category-img">
-    {% elif row['name'] == "мужское" %}
-   <img src="{{ url_for('static', filename='img/man.jpeg') }}" class="card-img-top category-img">
-    {% endif %}
-  <div class="card-body">
-    <h2 class="card-text">{{ row['name'] }}</h2>
-  </div>
+  {% for row in query %}
+  <a href="/client/catalog/{{ row['id'] }}">
+    <div class="card text-center">
+      {% if row['name'] == "женское" %}
+      <img
+        src="{{ url_for('static', filename='img/women.jpeg') }}"
+        class="card-img-top category-img"
+      />
+      {% elif row['name'] == "мужское" %}
+      <img
+        src="{{ url_for('static', filename='img/man.jpeg') }}"
+        class="card-img-top category-img"
+      />
+      {% endif %}
+      <div class="card-body">
+        <h2 class="card-text">{{ row['name'] }}</h2>
+      </div>
+    </div>
+  </a>
+  {% endfor %}
 </div>
-</a>
-{% endfor %}
-</div>
-    {% endif %}
-{% endblock %}
+{% endif %} {% endblock %}
