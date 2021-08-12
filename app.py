@@ -32,13 +32,7 @@ def home():
 @app.route('/client')
 @login_required
 def client():
-    # client = Customer(current_user.get_id())
-    # with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
-    #     with conn.cursor(cursor_factory=DictCursor) as cursor:
-    #         query = client.get_information(cursor)
-            # print(query, query['login'])
-    # g.user_login = query['login']
-    return render_template('client.html')
+    return render_template('client/base_client.html')
 
 
 @app.route('/client/catalog')
@@ -48,7 +42,7 @@ def view_catalog():
     with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
         with conn.cursor(cursor_factory=DictCursor) as cursor:
             query = customer.get_parent_category(cursor)
-    return render_template('client_catalog.html', query=query)
+    return render_template('client/catalog.html', query=query)
 
 
 @app.route('/client/catalog/<int:id>')
@@ -58,7 +52,7 @@ def view_catalog_more(id):
     with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
         with conn.cursor(cursor_factory=DictCursor) as cursor:
             query = customer.get_child_category(cursor, id)
-    return render_template('client_catalog_more.html', query=query)
+    return render_template('client/catalog_more.html', query=query)
 
 
 @app.route('/client/catalog/<int:id>/category/<int:category_id>')
@@ -68,17 +62,7 @@ def view_catalog_category(id, category_id):
     with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
         with conn.cursor(cursor_factory=DictCursor) as cursor:
             query = customer.get_child_category_more(cursor, category_id)
-    return render_template('client_catalog_category.html', query=query, id=id)
-
-#
-# @app.route('/client/catalog/product/<int:id>/order')
-# @login_required
-# def get_order_product(id):
-#     customer = Customer(client_id=current_user.get_id())
-#     with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
-#         with conn.cursor(cursor_factory=DictCursor) as cursor:
-#             query = customer.check_product_more(cursor, id)
-#     return render_template('client_catalog.html', query=query)
+    return render_template('client/catalog_category.html', query=query, id=id)
 
 
 @app.route('/client/pp')
@@ -88,7 +72,7 @@ def view_pp():
     with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
         with conn.cursor(cursor_factory=DictCursor) as cursor:
             query = customer.check_pp(cursor)
-    return render_template('client_pp.html', query=query)
+    return render_template('client/pp.html', query=query)
 
 
 @app.route('/client/order_status')
@@ -98,7 +82,7 @@ def view_order():
     with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
         with conn.cursor(cursor_factory=DictCursor) as cursor:
             query = customer.check_order(cursor)
-    return render_template('client_order.html', query=query)
+    return render_template('client/order.html', query=query)
 
 
 @app.route('/client/product_cart')
@@ -108,7 +92,7 @@ def view_product_cart():
     with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
         with conn.cursor(cursor_factory=DictCursor) as cursor:
             query = customer.get_order_cart(cursor)
-    return render_template('client_product_cart.html', query=query)
+    return render_template('client/product_cart.html', query=query)
 
 
 @app.route('/client/catalog/product/<int:id>', methods=['POST', 'GET'])
@@ -126,10 +110,10 @@ def view_product_more(id):
                 count_db = customer.get_product_count(cursor, id)
                 if count_db < count:
                     flash('Количество товара превышает количество товара в наличии')
-                    return render_template('client_change_characteristic_detail.html', query=query, form=form)
+                    return render_template('client/change_characteristic_detail.html', query=query, form=form)
                 else:
                     customer.add_to_cart(cursor, conn, id, count)
-    return render_template('client_change_characteristic_detail.html', query=query, form=form)
+    return render_template('client/change_characteristic_detail.html', query=query, form=form)
 
 
 @app.route('/client/add_order')
@@ -142,27 +126,11 @@ def client_add_order():
             customer.add_blank_order(cursor, conn)
     return redirect('/client/catalog')
 
-    # form = AddOrderForm()
-    # if form.validate_on_submit():
-    #     product = form.product.data
-    #     count = form.count.data
-    #     with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
-    #         with conn.cursor(cursor_factory=DictCursor) as cursor:
-    #             count_db = customer.get_product_count(cursor, product)
-    #             if count_db < count:
-    #                 flash('Количество товара превышает количество товара в наличии')
-    #                 return render_template('client_add_order.html', form=form)
-    #             else:
-    #                 customer.add_order(cursor, conn, current_user.id, product, count)
-    #     return redirect('/client/order_status')
-    # else:
-    #     return render_template('client_add_order.html', form=form)
-
 
 @app.route('/manager')
 @login_required
 def manager():
-    return render_template('manager.html')
+    return render_template('manager/base.html')
 
 
 @app.route('/manager/orders')
@@ -171,7 +139,7 @@ def manager_view_orders():
     with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
         with conn.cursor(cursor_factory=DictCursor) as cursor:
             query = manager.check_orders(cursor)
-    return render_template('manager_orders.html', query=query)
+    return render_template('manager/orders.html', query=query)
 
 
 @app.route('/manager/orders_report')
@@ -180,7 +148,7 @@ def manager_orders_report():
     with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
         with conn.cursor(cursor_factory=DictCursor) as cursor:
             query = manager.orders_report(cursor)
-    return render_template('manager_orders_report.html', query=query)
+    return render_template('manager/orders_report.html', query=query)
 
 
 @app.route('/manager/add_delivery/<int:id>', methods=['POST', 'GET'])
@@ -197,7 +165,7 @@ def manager_add_delivery(id):
                 manager.add_delivery(cursor, conn, id, pp, cost, date)
         return redirect('/manager/orders')
     else:
-        return render_template('manager_add_delivery.html', form=form)
+        return render_template('manager/add_delivery.html', form=form)
 
 
 @app.route('/manager/accept_order/<int:id>', methods=['POST', 'GET'])
@@ -217,7 +185,7 @@ def manager_view_pp():
     with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
         with conn.cursor(cursor_factory=DictCursor) as cursor:
             query = manager.check_all_pp(cursor)
-    return render_template('manager_pp.html', query=query)
+    return render_template('manager/pp.html', query=query)
 
 
 @app.route('/manager/change_client/<int:id>')
@@ -227,7 +195,7 @@ def manager_view_client_more(id):
     with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
         with conn.cursor(cursor_factory=DictCursor) as cursor:
             query = manager.check_client_more(cursor, id)
-    return render_template('manager_change_client_detail.html', query=query)
+    return render_template('manager/change_client_detail.html', query=query)
 
 
 @app.route('/manager/add_client', methods=['POST', 'GET'])
@@ -247,7 +215,7 @@ def manager_add_client():
                     manager.add_client(cursor, conn, surname, name, patronymic, number_phone, login, password)
         return redirect('/manager')
     else:
-        return render_template('manager_add_client.html', form=form)
+        return render_template('manager/add_client.html', form=form)
 
 
 @app.route('/manager/change_client')
@@ -257,7 +225,7 @@ def manager_change_client():
     with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
         with conn.cursor(cursor_factory=DictCursor) as cursor:
             query = manager.get_all_clients(cursor)
-    return render_template('manager_change_client.html', query=query)
+    return render_template('manager/change_client.html', query=query)
 
 
 @app.route('/manager/customers_report', methods=['POST', 'GET'])
@@ -270,12 +238,12 @@ def manager_customers_report():
         with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
             with conn.cursor(cursor_factory=DictCursor) as cursor:
                 query = manager.customers_report(cursor, year)
-        return render_template('manager_customers_report.html', form=form, query=query)
+        return render_template('manager/customers_report.html', form=form, query=query)
     else:
         with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
             with conn.cursor(cursor_factory=DictCursor) as cursor:
                 query = manager.customers_report(cursor, year=date.today().strftime("%Y"))
-        return render_template('manager_customers_report.html', form=form, query=query)
+        return render_template('manager/customers_report.html', form=form, query=query)
 
     # return render_template('manager_change_client.html', query=query)
 
@@ -300,7 +268,7 @@ def manager_view_client_update(id):
                 manager.change_client(cursor, conn, id, surname, name, patronymic, number_phone, login, password)
         return redirect('/manager')
     else:
-        return render_template('manager_change_client_update.html', surname=surname, name=name, patronymic=patronymic,
+        return render_template('manager/change_client_update.html', surname=surname, name=name, patronymic=patronymic,
                                number_phone=number_phone, login=login, password=password, form=form)
 
 
@@ -317,7 +285,7 @@ def manager_view_client_del(id):
 @app.route('/commodity_research')
 @login_required
 def commodity_research():
-    return render_template('commodity_research.html')
+    return render_template('commodity_research/base.html')
 
 
 @app.route('/commodity_research/product_report', methods=['POST', 'GET'])
@@ -331,13 +299,13 @@ def commodity_research_product_report():
         with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
             with conn.cursor(cursor_factory=DictCursor) as cursor:
                 query = commodity_research.products_report(cursor, category_id=category_id, month=month)
-        return render_template('commodity_research_product_report.html', form=form, query=query)
+        return render_template('commodity_research/product_report.html', form=form, query=query)
     else:
         with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
             with conn.cursor(cursor_factory=DictCursor) as cursor:
                 query = commodity_research.products_report(cursor, category_id=(1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
                                                            month=date.today().strftime("%m"))
-        return render_template('commodity_research_product_report.html', form=form, query=query)
+        return render_template('commodity_research/product_report.html', form=form, query=query)
 
 
 @app.route('/commodity_research/add_characteristic', methods=['POST', 'GET'])
@@ -355,7 +323,7 @@ def commodity_research_add_characteristic():
                 commodity_research.add_charasteristics(cursor, conn, product_id, size_id, color_id, count)
         return redirect('/commodity_research')
     else:
-        return render_template('commodity_research_add_characteristic.html', form=form)
+        return render_template('commodity_research/add_characteristic.html', form=form)
 
 
 @app.route('/commodity_research/add_product', methods=['POST', 'GET'])
@@ -374,7 +342,7 @@ def commodity_research_add_product():
                 commodity_research.add_product(cursor, conn, brand_id, category_id, description, price, weight)
         return redirect('/commodity_research/change_product')
     else:
-        return render_template('commodity_research_add_product.html', form=form)
+        return render_template('commodity_research/add_product.html', form=form)
 
 
 @app.route('/commodity_research/add_size', methods=['POST', 'GET'])
@@ -390,7 +358,7 @@ def commodity_research_add_size():
                 commodity_research.add_size(cursor, conn, name, standart)
         return redirect('/commodity_research')
     else:
-        return render_template('commodity_research_add_size.html', form=form)
+        return render_template('commodity_research/add_size.html', form=form)
 
 
 @app.route('/commodity_research/add_color', methods=['POST', 'GET'])
@@ -406,7 +374,7 @@ def commodity_research_add_color():
                 commodity_research.add_color(cursor, conn, name, code)
         return redirect('/commodity_research')
     else:
-        return render_template('commodity_research_add_color.html', form=form)
+        return render_template('commodity_research/add_color.html', form=form)
 
 
 @app.route('/commodity_research/change_characteristic')
@@ -416,7 +384,7 @@ def commodity_research_change_characteristic():
     with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
         with conn.cursor(cursor_factory=DictCursor) as cursor:
             query = commodity_research.get_characteristics(cursor)
-    return render_template('commodity_research_change_characteristic.html', query=query)
+    return render_template('commodity_research/change_characteristic.html', query=query)
 
 
 @app.route('/commodity_research/change_product')
@@ -426,7 +394,7 @@ def commodity_research_change_product():
     with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
         with conn.cursor(cursor_factory=DictCursor) as cursor:
             query = commodity_research.get_all_product(cursor)
-    return render_template('commodity_research_change_product.html', query=query)
+    return render_template('commodity_research/change_product.html', query=query)
 
 
 @app.route('/commodity_research/change_product/<int:id>')
@@ -436,7 +404,7 @@ def commodity_research_view_product_more(id):
     with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
         with conn.cursor(cursor_factory=DictCursor) as cursor:
             query = commodity_research.check_product_more(cursor, id)
-    return render_template('commodity_research_change_product_detail.html', query=query)
+    return render_template('commodity_research/change_product_detail.html', query=query)
 
 
 @app.route('/commodity_research/change_characteristic/<int:id>')
@@ -446,7 +414,7 @@ def commodity_research_view_characteristic_more(id):
     with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
         with conn.cursor(cursor_factory=DictCursor) as cursor:
             query = commodity_research.check_characteristic_more(cursor, id)
-    return render_template('commodity_research_change_characteristic_detail.html', query=query)
+    return render_template('commodity_research/change_characteristic_detail.html', query=query)
 
 
 @app.route('/commodity_research/change_product/<int:id>/del')
@@ -487,7 +455,7 @@ def commodity_research_view_characteristic_update(id):
                 commodity_research.change_characteristic(cursor, conn, id, product_id, size_name, color_name, count)
         return redirect('/commodity_research')
     else:
-        return render_template('commodity_research_change_characteristic_update.html', count=count, form=form)
+        return render_template('commodity_research/change_characteristic_update.html', count=count, form=form)
 
 
 @app.route('/commodity_research/change_product/<int:id>/update', methods=['POST', 'GET'])
@@ -509,7 +477,7 @@ def commodity_research_view_product_update(id):
                 commodity_research.change_product(cursor, conn, id, brand_id, category_id, description, price, weight)
         return redirect('/commodity_research/change_product')
     else:
-        return render_template('commodity_research_change_product_update.html', description=description, price=price, weight=weight,
+        return render_template('commodity_research/change_product_update.html', description=description, price=price, weight=weight,
                                form=form)
 
 
@@ -561,6 +529,7 @@ def login_stuff():
             with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
                 with conn.cursor(cursor_factory=DictCursor) as cursor:
                     employee = Login().get_employee_by_email(cursor, login)
+                    # print(employee['password_employee'])
                     password_flag = True if employee['password_employee'] == password else False
         except:
             flash('Неправильный логин')
@@ -606,7 +575,7 @@ def registration():
                         return redirect('/login')
     else:
         return render_template('login.html', form=form)
-
+    # if request.method == "POST":
 
 
 @app.route("/logout")

@@ -1,4 +1,4 @@
-{% extends 'commodity_research.html'%} {% block body %}
+{% extends 'commodity_research/base.html'%} {% block body %}
 
 <form action="" method="post" class="commodity_research-add-product">
   {{ form.hidden_tag() }} {% for field in form if field.name not in

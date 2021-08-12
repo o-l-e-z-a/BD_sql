@@ -1,4 +1,4 @@
-{% extends 'client.html'%} {% block body %}
+{% extends 'commodity_research/base.html'%} {% block body %}
 <table class="table1">
   <tbody>
     <tr>
@@ -18,12 +18,18 @@
       <td>{{row['cost']}}</td>
       <td>{{row['weight']}}</td>
       <td class="td-link">
-        <a class="btn btn-info" href="/client/catalog/product/{{ row.id }}"
+        <a
+          class="btn btn-info"
+          href="/commodity_research/change_product/{{ row['id'] }}"
           >подробнее</a
         >
       </td>
+
+      <!--                <td class="td-link">-->
+      <!--                </td>-->
     </tr>
     {% endfor %}
   </tbody>
 </table>
+
 {% endblock %}

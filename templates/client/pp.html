@@ -1,4 +1,4 @@
-{% extends 'client.html'%} {% block body %} {% if current_user.is_authenticated
+{% extends 'client/base_client.html'%} {% block body %} {% if current_user.is_authenticated
 %} {% if query|length == 0 %}
 <p style="font-size: 22px; margin-bottom: 30px">
   Вы еще не сделали заказ, перейдите в каталог, чтобы просмотреть товары

@@ -1,4 +1,4 @@
-{% extends 'commodity_research.html'%} {% block body %}
+{% extends 'commodity_research/base.html'%} {% block body %}
 <table class="table1">
   <tbody>
     <tr>
@@ -8,26 +8,32 @@
       <td class="td-header">Размер</td>
       <td class="td-header">Цвет</td>
       <td class="td-header">Количество</td>
+      <!--                <td class="td-link">-->
+      <!--                <a class="btn btn-warning fgdfg" href="/tables">таблица</a>-->
+      <!--                </td>-->
     </tr>
     {% for row in query %}
     <tr>
       <td>{{row['id']}}</td>
       <td>{{row['brand_name']}}</td>
       <td>{{row['category_name']}}</td>
+
       <td>{{row['size_name']}}</td>
       <td>{{row['color_name']}}</td>
       <td>{{row['count']}}</td>
+      <td class="td-link">
+        <a
+          class="btn btn-info"
+          href="/commodity_research/change_characteristic/{{ row['id'] }}"
+          >подробнее</a
+        >
+      </td>
+
+      <!--                <td class="td-link">-->
+      <!--                </td>-->
     </tr>
+    {% endfor %}
   </tbody>
 </table>
-<a
-  class="btn btn-success"
-  href="/commodity_research/change_characteristic/{{row['id']}}/update"
-  >Изменить</a
->
-<a
-  class="btn btn-danger"
-  href="/commodity_research/change_characteristic/  {{row['id']}}/del"
-  >удалить</a
->
-{% endfor %} {% endblock %}
+
+{% endblock %}
