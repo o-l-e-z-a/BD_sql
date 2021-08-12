@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 import psycopg2
-from settings import *
+from settings import DB_NAME, USER, PASSWORD, HOST
 from contextlib import closing
 from psycopg2.extras import DictCursor
 from decimal import Decimal

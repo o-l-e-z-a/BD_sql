@@ -1,11 +1,14 @@
 from flask import Flask, render_template, redirect, flash, g
 from flask_login import LoginManager, login_required, current_user, login_user, logout_user
 from forms import *
+
 from login import UserLogin
+
+from settings import SECRET_KEY
 
 app = Flask(__name__, static_folder='static')
 app.config.debug = True
-app.config['SECRET_KEY'] = 'dfgd5t623@$%^&*9ghf78bjsedfi3534((%^$%#$65ndfob7687dfdfbfg'
+app.config['SECRET_KEY'] = SECRET_KEY
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
@@ -558,7 +561,6 @@ def login_stuff():
             with closing(psycopg2.connect(dbname=DB_NAME, user=USER, password=PASSWORD, host=HOST)) as conn:
                 with conn.cursor(cursor_factory=DictCursor) as cursor:
                     employee = Login().get_employee_by_email(cursor, login)
-                    # print(employee['password_employee'])
                     password_flag = True if employee['password_employee'] == password else False
         except:
             flash('Неправильный логин')
@@ -604,7 +606,7 @@ def registration():
                         return redirect('/login')
     else:
         return render_template('login.html', form=form)
-    # if request.method == "POST":
+
 
 
 @app.route("/logout")
