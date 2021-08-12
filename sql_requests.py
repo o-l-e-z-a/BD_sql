@@ -278,7 +278,7 @@ class BaseUser:
 
 class Customer(BaseUser):
     """
-           Класс для представления Покупателя
+    Класс для представления Покупателя
     """
 
     def __init__(self, client_id, surname=None, name=None):
@@ -377,8 +377,6 @@ class Customer(BaseUser):
             return False
 
     def add_to_cart(self, cursor, conn, product_id, count):
-        # cursor.execute("""SELECT "order".id from "order" where "order".id = %s order by "order".id""", (self.id,))
-        # order_query = cursor.fetchall()
         order_id = self.get_last_order_id(cursor)
         print(order_id)
         cursor.execute(
@@ -410,15 +408,12 @@ class Customer(BaseUser):
         """
         Метод для добавления заказа
         """
-        # try:
         employee_id = self.get_manager_id(cursor)
         order_id = self.get_last_order_id(cursor)
         order_value = Decimal('0')
         order_cart = self.get_order_cart(cursor)
         for row in order_cart:
-            # print(row['cost'], row['quantity'], type(row['cost']))
             order_value += row['cost'] * row['quantity']
-            # print(order_value)
             cursor.execute(
                 """UPDATE characteristics SET count = count - %s
                     WHERE characteristics.product_id = %s""", (row['quantity'], row['p_id']))
@@ -452,8 +447,7 @@ class Customer(BaseUser):
             cursor.execute(
                 """Update client set discount_id = %s where client.id = %s""", (discount_id, self.id))
             conn.commit()
-        # except:
-        #     print('ввели не правильные данные')
+
 
     def get_product_count(self, cursor, product_id):
         """
@@ -538,7 +532,7 @@ class Manager(BaseUser):
         Метод для получении иноформации обо всех заказов для данного менежера
         """
         # d1 = date.today()
-        d1 = date(2021, 4, 15)
+        d1 = date(2021, 4, 15)  # период с выполнеными заказами
         d3 = d1 - timedelta(days=3)
         cursor.execute(
             """SELECT "order".id, client.surname, client.name, client.patronymic,  "order".order_status, 
@@ -554,7 +548,6 @@ class Manager(BaseUser):
         """
         Метод для получении иноформации обо всех заказов для данного менежера
         """
-        # d1 = date.today()
         cursor.execute(
             """with sum_client_order as (select client_id, count(client_id), sum(order_value) as sum_value from "order"
                 where order_status not like('В корзине') and  extract(year from date_of_registration) =  %s
@@ -648,7 +641,7 @@ class Manager(BaseUser):
 
 class CommodityResearch(BaseUser):
     """
-               Класс для представления Администратора
+    Класс для представления Администратора
     """
 
     def __init__(self, employee_id, surname=None, name=None):
@@ -814,31 +807,3 @@ class CommodityResearch(BaseUser):
             ORDER BY brand_name""", (product_id,))
         query = cursor.fetchall()
         return query
-
-
-@db_conn
-def print_product(cursor, conn):
-    base = Customer(1)
-    query = base.get_order_cart(cursor)
-    print(len(query))
-    for row in query:
-        print(row)
-    # print()
-    # query = base.get_product_count(cursor, 3)
-    # print(type(query), query)
-    # a = base.check_blank_order(cursor)
-    # print(a)
-# query = base.change_product(cursor, conn, 1, 1, 1, 'Платье женское Guess желтого цвета', 2300, 0.9)  88005553535
-# query = base.change_client(cursor, conn, 1, 'Иванов', 'Иван', 'Иванович', '88005553535', 'ivanov@mail.ru', 'ivanov')
-# query = base.change_characteristic(cursor, conn, 1, 1, 1, 6, 115)
-# query = base.add_client(cursor, conn, 'f', 'n', 'p', '12345678901', 'log@log.log', 'psw')
-# base.delete_client(cursor, conn, 21)
-
-#     query = base.check_characteristic_more(cursor, 1)
-# base.add_delivery(cursor, conn, 3, 3, 2700, '2022-01-10')
-# print(query)
-
-# print(row['brand_name'])
-
-
-# print_product()
